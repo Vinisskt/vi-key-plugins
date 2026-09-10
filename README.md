@@ -39,6 +39,7 @@ TELEFONE
 | `:pkg <op> [alvos]` | pacotes do Termux |
 | `:weather [cidade]` | previsão do tempo (wttr.in) |
 | `:tr [texto]` | tradução PT↔EN (translate-shell/Google) |
+| `:scroll` | entra no modo SCROLL — j/k rolam listas, ESC volta ao modo INSERT |
 | `:ipcloop` | status do daemon (heartbeat) |
 
 O teclado **nunca trava**: os plugins só escrevem/leem arquivos em
@@ -106,6 +107,14 @@ Sintaxe geral: digite `:` no teclado e o nome do comando.
   idêntico ao original;
 - precisa de internet (Google Translate). Sem `trans` ou sem rede, avisa o
   motivo exato.
+
+### Sobre o `:scroll`
+
+- `:scroll` ativa o **modo SCROLL** — j/k enviam setas (DPAD) que rolam
+  listas/grades dentro de apps (WhatsApp, Twitter, Reddit, etc);
+- para voltar a digitar, pressione `ESC` ou `i` (volta ao modo INSERT);
+- útil quando o foco está no campo de texto mas você quer rolar a lista por
+  trás.
 
 ## Arquitetura — protocolo dos arquivos
 
