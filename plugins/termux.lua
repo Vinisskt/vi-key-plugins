@@ -22,10 +22,27 @@ local function read_file(path)
 end
 
 -- ---- Acompanhamento ao vivo de comandos longos (pkg upgrade, ping, ...) ----
--- Requer vim.interval (teclados novos); sem a API, degrada para o modo
--- estatico ("termux processando..." + :->).
+-- Nada de abrir a webview sozinho: a statusbar mostra as últimas linhas da
+-- saída sendo atualizadas. Ao terminar, use :-> para ver a saída completa
+-- numa página. Requer vim.interval (teclados novos); sem a API, degrada para
+-- o modo estatico ("termux processando..." + :->).
 local follow_handle = nil
 local follow_last = nil
+local FOLLOW_LINES = 5
+
+-- Status persistente (não "pisca" de volta pro modo a cada 4s como vim.status).
+-- Degrada para vim.status em teclados sem a nova API.
+local status = vim.status_hold or vim.status
+
+-- Últimas [n] linhas de [s] (a saída cresce — a primeira sempre cai).
+local function tail_lines(s, n)
+  local t = {}
+  for line in (s .. "\n"):gmatch("(.-)\n") do
+    t[#t + 1] = line
+    if #t > n then table.remove(t, 1) end
+  end
+  return table.concat(t, "\n")
+end
 
 local function tidy(s)
   return s and s:gsub("%s+$", "") or ""
@@ -36,11 +53,12 @@ local function follow_tick()
   local done = read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil
   if out ~= follow_last then
     follow_last = out
-    vim.page(out == "" and "(aguardando saída...)" or out)
+    status(out == "" and "termux: processando..." or tail_lines(out, FOLLOW_LINES))
   end
   if done then
     vim.clear_interval(follow_handle)
     follow_handle = nil
+    status("termux: concluído — :-> para ver a saída completa")
     return
   end
   -- Daemon morreu no meio do comando? (busy preso sem heartbeat) -> avisa e para.
@@ -50,7 +68,7 @@ local function follow_tick()
   if now - hb > 6 and now - last > 6 then
     vim.clear_interval(follow_handle)
     follow_handle = nil
-    vim.page(out .. "\n\n(daemon sem resposta — comando pode ter morrido)")
+    status("termux: daemon sem resposta — comando pode ter morrido (:->)")
   end
 end
 
@@ -65,8 +83,8 @@ local function follow_start()
   if not vim.interval then return end
   follow_stop()
   follow_last = nil
-  vim.page("(aguardando saída...)\n")
-  follow_handle = vim.interval(600, follow_tick)
+  status("termux: processando...")
+  follow_handle = vim.interval(300, follow_tick)
 end
 
 -- Roda um comando e devolve a saída como texto (nil se sem-resposta). NÃO
@@ -97,7 +115,6 @@ function M.exec(input)
   local last = tonumber(read_file(DATA .. "/last-start")) or 0
   local now = os.time()
   if now - last <= 8 or now - hb <= 8 then
-    vim.status("termux processando — acompanhando a saída...")
     follow_start()
   else
     vim.status("termux sem resposta (rode ipc-loop.lua no Termux)")
@@ -161,7 +178,6 @@ function M.run(input)
   local last = tonumber(read_file(DATA .. "/last-start")) or 0
   local now = os.time()
   if now - last <= 4 or now - hb <= 4 then
-    vim.status("termux processando — acompanhando a saída...")
     follow_start()
   else
     vim.status("termux sem resposta (rode ipc-loop.lua no Termux)")
