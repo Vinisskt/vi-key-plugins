@@ -18,3 +18,7 @@ require("ping")     -- :ping <host>            latência de rede
 require("pkg")      -- :pkg <op> [alvos]       pacotes do Termux
 require("weather")  -- :weather [cidade]       previsão do tempo
 require("translate") -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
+require("scroll")   -- :scroll                  modo scroll (j/k rolam listas)
+
+-- Temas (API vim.theme):
+require("dracula")  -- :dracula / :theme        tema Dracula (registra + aplica)
