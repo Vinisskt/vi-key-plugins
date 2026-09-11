@@ -1,24 +1,53 @@
 -- init.lua — ponto de entrada dos plugins, carregado pelo teclado.
--- Cada plugin é um módulo em plugins/ (nome do arquivo = comando):
---   require("termux")   -> :termux  (porta para o Termux / ferramentas Linux)
---   require("ipc-loop") -> :ipcloop (daemon da ponte, roda no Termux)
-require("termux")
-require("ipc-loop")
+--
+-- A tabela [plugins] organiza os plugins por categoria; cada categoria é
+-- uma lista de nomes de módulos em plugins/<nome>.lua. Para desativar um
+-- plugin basta comentar a linha dele (ele não é carregado e nenhum comando
+-- dele fica disponível). Nos temas, deixe descomentados só os que quiser
+-- usar (ex.: 2 ou 3) e alterne com :theme <nome>.
 
--- Utilitários (usam a ponte :termux):
-require("cat")      -- :cat <caminho>          mostra um arquivo
-require("files")    -- :files [caminho]        lista arquivos
-require("ip")       -- :ip                     endereços de rede
-require("which")    -- :which <prog...>        caminho de executáveis
-require("calc")     -- :calc <expr>            calculadora (Lua)
-require("battery")  -- :battery                nível/status da bateria
-require("sysinfo")  -- :sysinfo [net|cpu|mem|disk]
-require("todo")     -- :todo [add|del|done]    lista pessoal
-require("ping")     -- :ping <host>            latência de rede
-require("pkg")      -- :pkg <op> [alvos]       pacotes do Termux
-require("weather")  -- :weather [cidade]       previsão do tempo
-require("translate") -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
-require("scroll")   -- :scroll                  modo scroll (j/k rolam listas)
+local plugins = {
 
--- Temas (API vim.theme):
-require("dracula")  -- :dracula / :theme        tema Dracula (registra + aplica)
+  -- ===== Núcleo (recomendado manter) =====
+  nucleo = {
+    "termux",      -- :termux   porta para o Termux / ferramentas Linux
+    "ipc-loop",    -- :ipcloop  daemon da ponte (roda no Termux)
+  },
+
+  -- ===== Utilitários (usam a ponte :termux) =====
+  utilitarios = {
+    "cat",         -- :cat <caminho>          mostra um arquivo
+    "files",       -- :files [caminho]        lista arquivos
+    "ip",          -- :ip                     endereços de rede
+    "which",       -- :which <prog...>        caminho de executáveis
+    "calc",        -- :calc <expr>            calculadora (Lua)
+    "battery",     -- :battery                nível/status da bateria
+    "sysinfo",     -- :sysinfo [net|cpu|mem|disk]
+    "todo",        -- :todo [add|del|done]    lista pessoal
+    "ping",        -- :ping <host>            latência de rede
+    "pkg",         -- :pkg <op> [alvos]       pacotes do Termux
+    "weather",     -- :weather [cidade]       previsão do tempo
+    "translate",   -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
+    "scroll",      -- :scroll                  modo scroll (j/k rolam listas)
+  },
+
+  -- ===== Temas (deixe descomentados só os que quiser alternar) =====
+  temas = {
+    "dracula",     -- :dracula / :theme       tema Dracula (paleta oficial)
+    -- "monokai",  -- (exemplo: tema extra, :theme monokai)
+  },
+}
+
+-- Ordem de carregamento: categorias abaixo, na mesma ordem da tabela e
+-- dentro de cada categoria, os plugins na ordem da lista.
+local categories = { "nucleo", "utilitarios", "temas" }
+for _, cat in ipairs(categories) do
+  for _, name in ipairs(plugins[cat]) do
+    local ok, err = pcall(require, name)
+    if not ok then
+      vim.status("plugin '" .. name .. "' falhou: " .. err)
+    end
+  end
+end
+
+return {}
