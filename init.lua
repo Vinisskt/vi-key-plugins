@@ -33,7 +33,9 @@ local plugins = {
 
   -- ===== Temas (deixe descomentados só os que quiser alternar) =====
   temas = {
-    "dracula",     -- :dracula / :theme       tema Dracula (paleta oficial)
+    "gruvbox",     -- :gruvbox / :theme gruvbox  volta ao padrão embutido do app
+    "dracula",     -- :dracula / :theme dracula  tema Dracula (paleta oficial)
+    "tokyo",       -- :tokyo / :theme tokyo      tema Tokyo Night (paleta oficial)
     -- "monokai",  -- (exemplo: tema extra, :theme monokai)
   },
 }
