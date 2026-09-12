@@ -122,6 +122,53 @@ function M.exec(input)
   return nil
 end
 
+-- Igual [M.exec], mas NÃO bloqueia o teclado: escreve o comando e volta na
+-- hora, usando [vim.interval] para perceber a conclusão e chamar
+-- [ondone(out)] quando o daemon terminar (out = nil se sem-resposta).
+-- Sem [vim.interval] (teclados antigos), degrada para o exec síncrono.
+function M.exec_async(input, ondone)
+  local args = input
+  if type(input) ~= "table" then args = { input } end
+  local cmd = table.concat(args, " ")
+  if cmd == "" then
+    ondone(nil)
+    return
+  end
+  if not vim.interval then
+    ondone(M.exec(cmd))
+    return
+  end
+  local tmp = DATA .. "/cmd.tmp"
+  local f = io.open(tmp, "w")
+  if not f then
+    vim.status("falta data/ (rode ipc-loop.lua no Termux)")
+    ondone(nil)
+    return
+  end
+  f:write(cmd .. "\n")
+  f:close()
+  os.remove(DATA .. "/cmd")
+  os.rename(tmp, DATA .. "/cmd")
+  follow_stop()
+  local t0 = os.time()
+  local h
+  h = vim.interval(50, function()
+    if read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil then
+      vim.clear_interval(h)
+      ondone(tidy(read_file(DATA .. "/out") or ""))
+    elseif os.time() - t0 > 6 then
+      local hb = tonumber(read_file(DATA .. "/heartbeat")) or 0
+      local last = tonumber(read_file(DATA .. "/last-start")) or 0
+      local now = os.time()
+      if now - last > 8 and now - hb > 8 then
+        vim.clear_interval(h)
+        vim.status("termux sem resposta (rode ipc-loop.lua no Termux)")
+        ondone(nil)
+      end
+    end
+  end)
+end
+
 function M.show()
   local f = io.open(DATA .. "/out", "r")
   if not f then
