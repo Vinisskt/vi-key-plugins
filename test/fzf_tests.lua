@@ -109,10 +109,10 @@ local function fresh(fs, opts)
   setmetatable(env, { __index = _G })
   local chunk = assert(loadfile(PLUGIN))
   setfenv(chunk, env)
-  assert(chunk(), "plugin carrega")
+  local mod = assert(chunk(), "plugin carrega")
   local reg = vim.registrations[1]
   assert(reg and reg[1] == "fzf" and type(reg[2]) == "function", "vim.register(fzf, fn)")
-  return { vim = vim, termux = termux, cmd = reg[2] }
+  return { vim = vim, termux = termux, cmd = reg[2], mod = mod }
 end
 
 -- Helpers de inspeção sobre a última janela renderizada.
@@ -275,9 +275,9 @@ do
   assert(hook(t)("enter"))
   eq("D2 aninhado p/ docs/", t.termux.calls[3], ls(HOME .. "/storage/docs/"))
   eq("D2b header", head(t.vim.holds[#t.vim.holds]), "fzf 2/3  @~/storage/docs/")
-  -- roda readme (cur=2)
+  -- roda readme (cur=2) — caminho absoluto (antes: 'readme.md' relativo ao HOME)
   assert(hook(t)("enter"))
-  eq("D3 arquivo roda como comando", seqeq(t.termux.runs[1], { "readme.md" }), true)
+  eq("D3 arquivo roda com caminho absoluto", seqeq(t.termux.runs[1], { HOME .. "/storage/docs/readme.md" }), true)
   eq("D3b hook limpo + insert", t.vim.hooks[t.vim.nhook] == nil and t.vim.modes[#t.vim.modes] == "insert", true)
 
   -- sobe de ~/storage/docs
@@ -492,7 +492,7 @@ eq("H3c cauda do path preservada", hh:sub(-8), string.sub("~/" .. longname .. "/
   t6.cmd()
   eq("H6 um arquivo + .. = 2 itens", head(t6.vim.holds[#t6.vim.holds]), "fzf 2/2  @~")
   assert(hook(t6)("enter"))
-  eq("H6b roda o arquivo", seqeq(t6.termux.runs[1], { "solo.txt" }), true)
+  eq("H6b roda o arquivo (absoluto)", seqeq(t6.termux.runs[1], { HOME .. "/solo.txt" }), true)
 
   -- H7 diretorio cujo item termina com "/" dir com espaco e enter repetido em .. (sobe ate / e fica)
   local t7 = fresh(home_chain_fs())
@@ -680,6 +680,84 @@ do
   for _, c in ipairs { ".", "s", "e", "c", "r", "e", "t" } do assert(hook(t)(c)) end
   eq("J11c oculto em subpasta", head(t.vim.holds[#t.vim.holds]), "fzf 1/1  @~  '.secret'")
   eq("J11d linha", jl(t.vim.holds[#t.vim.holds]), "> ~storage/.secret.cfg")
+end
+
+-- Fixture minima p/ carregar cat.lua na mesma sandbox (require("fzf") = t.mod)
+local function fresh_with(plugin, fs)
+  local t = fresh(fs)
+  local env = { vim = t.vim, termux = t.termux }
+  env.require = function(name)
+    if name == "termux" then return t.termux end
+    if name == "shell" then return { shq = shq } end
+    if name == "fzf" then return t.mod end
+  end
+  setmetatable(env, { __index = _G })
+  local chunk = assert(loadfile(plugin))
+  setfenv(chunk, env)
+  assert(chunk(), "carrega " .. plugin)
+  return t
+end
+
+print("== K. Modo seletor (open_explorer c/ callback) ==")
+
+do
+  -- K1 seletor estilo :cat: navega ate um arquivo e o callback recebe ele
+  local t = fresh(FS_D)
+  local picked = {}
+  t.mod.open_explorer(nil, function(p) picked[1] = p end)
+  assert(hook(t)("enter"))                 -- storage/
+  assert(hook(t)("down"))                  -- storage.png
+  assert(hook(t)("down"))                  -- docs/
+  assert(hook(t)("enter"))                 -- entra docs/
+  assert(hook(t)("enter"))                 -- readme (cur=2)
+  eq("K1 seleciona arquivo", picked[1], HOME .. "/storage/docs/readme.md")
+  eq("K1b nao roda comando", #t.termux.runs, 0)
+  eq("K1c sai p/ insert", t.vim.modes[#t.vim.modes], "insert")
+
+  -- K2 pasta: callback NAO e chamado, continua navegando
+  local t2 = fresh(FS_D)
+  local n = 0
+  t2.mod.open_explorer(nil, function() n = n + 1 end)
+  assert(hook(t2)("enter"))                -- storage/
+  eq("K2 pasta so navega (sem callback)", n, 0)
+  assert(hook(t2)("esc"))
+  eq("K2b esc sai sem chamar", n, 0)
+
+  -- K3 esc descarta o callback: um :fzf novo (sem picker) roda o arquivo
+  t2.cmd()
+  assert(hook(t2)("enter"))                -- storage/
+  assert(hook(t2)("down"))
+  assert(hook(t2)("down"))
+  assert(hook(t2)("enter"))                -- docs/
+  assert(hook(t2)("enter"))                -- readme
+  ok("K3 :fzf novo roda, nao picka", seqeq(t2.termux.runs[1], { HOME .. "/storage/docs/readme.md" }))
+  eq("K3b callback velho nunca chamou", n, 0)
+end
+
+print("== L. cat/files usam o fzf ==")
+
+do
+  -- L1 :cat sem argumento abre o explorador na raiz do home
+  local t = fresh_with("plugins/cat.lua", FS_D)
+  local catf = assert(t.vim.registrations[#t.vim.registrations][2], "registry cat")
+  catf()
+  eq("L1 :cat abre explorador @~", head(t.vim.holds[#t.vim.holds]), "fzf 2/5  @~")
+  -- e o Enter num arquivo chama 'cat <abs>'
+  assert(hook(t)("enter"))                 -- storage/
+  assert(hook(t)("down"))
+  assert(hook(t)("down"))
+  assert(hook(t)("enter"))                 -- docs/
+  assert(hook(t)("enter"))                 -- readme
+  eq("L1b cat no arquivo escolhido", seqeq(t.termux.runs[1], { "cat " .. shq(HOME .. "/storage/docs/readme.md") }), true)
+
+  -- L2 :files sem argumento abre @~; :files /sdcard/Download abre naquele dir
+  local t2 = fresh_with("plugins/files.lua", { [ls("/sdcard/Download")] = "foto.jpg\nvideos/", [homef()] = HOME .. "\nnotas.txt" })
+  local filesf = assert(t2.vim.registrations[#t2.vim.registrations][2], "registry files")
+  filesf()
+  eq("L2 :files abre @~", head(t2.vim.holds[#t2.vim.holds]), "fzf 2/2  @~")
+  assert(hook(t2)("esc"))
+  filesf("/sdcard/Download")
+  eq("L2b :files <dir> abre naquele dir", head(t2.vim.holds[#t2.vim.holds]), "fzf 2/3  @/sdcard/Download")
 end
 
 -----------------------------------------------------------------------

@@ -36,6 +36,9 @@ local base = ""
 local home_root = nil
 local query = ""
 local session = 0
+-- Callback do modo seletor (open_explorer c/ on_pick): Enter num arquivo
+-- chama pick_cb(caminho_absoluto) em vez de rodar; pasta continua navegando.
+local pick_cb = nil
 local on_key
 local apply_filter
 local enter_dir
@@ -116,6 +119,7 @@ end
 local function stop()
   active = false
   vim.key_hook(nil)
+  pick_cb = nil
   -- Avanca a sessao: callbacks pendentes (index/descida) de instancias
   -- canceladas sao ignorados pelo guarda `session ~= my`.
   session = session + 1
@@ -280,26 +284,35 @@ end
 local function run_selected()
   local item = list[cur]
   if item == nil then return end
+  local cb = pick_cb  -- stop() zera o pick_cb: guarda ANTES de sair
+  local path
   if search_mode then
+    path = home_root .. "/" .. item
     stop()
     vim.set_mode("insert")
-    termux.run({ home_root .. "/" .. item })
-    return
-  end
-  if explorer then
+  elseif explorer then
     if item == ".." then
       enter_dir(parent(base))
+      return
     elseif item:sub(-1) == "/" then
       enter_dir(base:gsub("/+$", "") .. "/" .. item)
+      return
     else
+      -- Arquivo: CAMINHO ABSOLUTO (base + "/" + item). Antes rodava só o
+      -- nome, relativo ao $HOME — não achava arquivo fora da raiz.
+      path = base:gsub("/+$", "") .. "/" .. item
       stop()
       vim.set_mode("insert")
-      termux.run({ item })
     end
   else
+    path = item
     stop()
     vim.set_mode("insert")
-    termux.run({ item })
+  end
+  if cb then
+    cb(path)
+  else
+    termux.run({ path })
   end
 end
 
@@ -361,43 +374,69 @@ function on_key(key)
   return false
 end
 
+-- Abre o explorador na raiz do home (resolucao + listagem no 1o uso).
+local function start_home()
+  if home_root == nil then
+    -- Resolucao + listagem da raiz num unico exec (1 round-trip IPC).
+    -- $HOME em aspas duplas expande no bash (o shq() aspalha tudo e veda ~).
+    if vim.status_hold then status("fzf: carregando...") end
+    local out = termux.exec("printf '%s\\n' \"$HOME\"; ls -A -p \"$HOME\"")
+    if out == nil or out == "" then
+      vim.status("fzf: nao conseguiu resolver $HOME")
+      return
+    end
+    local home = out:match("([^\n]+)")
+    if not home or home == "" then
+      vim.status("fzf: nao conseguiu resolver $HOME")
+      return
+    end
+    home_root = home
+    open_list(out:sub(#home + 1), true, home_root)
+    return
+  end
+  enter_dir(home_root)  -- home cacheado: so executa a listagem
+end
+
 function M.run(args)
   if #args == 0 then
     if not vim.key_hook then
       vim.status("fzf: requer atualização do teclado (vim.key_hook)")
       return
     end
-    if home_root == nil then
-      -- Resolucao + listagem da raiz num unico exec (1 round-trip IPC).
-      -- $HOME em aspas duplas expande no bash (o shq() aspalha tudo e veda ~).
-      if vim.status_hold then status("fzf: carregando...") end
-      local out = termux.exec("printf '%s\\n' \"$HOME\"; ls -A -p \"$HOME\"")
-      if out == nil or out == "" then
-        vim.status("fzf: nao conseguiu resolver $HOME")
-        return
-      end
-      local home = out:match("([^\n]+)")
-      if not home or home == "" then
-        vim.status("fzf: nao conseguiu resolver $HOME")
-        return
-      end
-      home_root = home
-      open_list(out:sub(#home + 1), true, home_root)
-      return
-    end
-    enter_dir(home_root)  -- home cacheado: so executa a listagem
+    pick_cb = nil
+    start_home()
     return
   end
   if not vim.key_hook then
     vim.status("fzf: requer atualização do teclado (vim.key_hook)")
     return
   end
+  pick_cb = nil
   local out = termux.exec(table.concat(args, " "))
   if out == nil or out == "" then
     vim.status("fzf: sem resultado (comando >6s ou nada na saída)")
     return
   end
   open_list(out, false, nil)
+end
+
+-- API para outros plugins:
+--   fzf.open_explorer()                 explorador na raiz do home
+--   fzf.open_explorer(caminho)          explorador enraizado em [caminho]
+--   fzf.open_explorer(caminho, cb)      MODO SELETOR: Enter num ARQUIVO chama
+--                                       cb(caminho_absoluto); em pasta segue
+--                                       navegando; esc sai sem chamar nada.
+function M.open_explorer(start, on_pick)
+  if not vim.key_hook then
+    vim.status("fzf: requer atualização do teclado (vim.key_hook)")
+    return
+  end
+  pick_cb = on_pick or nil
+  if start == nil or start == "" then
+    start_home()
+  else
+    enter_dir(start)
+  end
 end
 
 vim.register("fzf", function(...) M.run({...}) end)
