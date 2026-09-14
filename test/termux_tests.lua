@@ -7,13 +7,28 @@ local T = dofile("test/runner.lua")
 local sandbox = dofile("test/sandbox.lua")
 
 local uid = 0
+-- Termux não permite gravar em /tmp; usa $TMPDIR (writable) e no pior caso,
+-- a pasta do usuário. As pastas criadas sao removidas no fim (T.done).
+local TMP = os.getenv("TMPDIR")
+if not TMP or TMP == "" then TMP = os.getenv("HOME") or "." end
+local DIRS = {}
 local function fresh_data()
   uid = uid + 1
   -- Suffixo único: os.time tem resolução de 1s e várias pastas nascem no mesmo
   -- segundo na mesma execução (senão colidiriam e vazariam estado entre seções).
-  local dir = "/tmp/vk-termux-test-" .. tostring(os.time()) .. "-" .. tostring(uid)
-  os.execute("mkdir -p '" .. dir .. "'")
+  local dir = TMP .. "/vk-termux-test-" .. tostring(os.time()) .. "-" .. tostring(uid)
+  local ok = os.execute("mkdir -p '" .. dir .. "'")
+  if ok ~= 0 and ok ~= true then
+    error("não consegui criar dir de teste: " .. dir)
+  end
+  DIRS[#DIRS + 1] = dir
   return dir
+end
+
+local function limpa()
+  for _, dir in ipairs(DIRS) do
+    os.execute("rm -rf '" .. dir .. "' 2>/dev/null")
+  end
 end
 
 local function tmpfile(dir, name, content)
@@ -262,3 +277,4 @@ cmd_arrow()
 T.eq(":-> via registro", m15.vim.statuses[#m15.vim.statuses], "estático")
 
 T.done("termux")
+limpa()

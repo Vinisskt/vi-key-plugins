@@ -6,10 +6,19 @@ local T = dofile("test/runner.lua")
 local sandbox = dofile("test/sandbox.lua")
 
 local uid = 0
+-- Termux não permite gravar em /tmp; usa $TMPDIR (writable) e, no pior caso,
+-- a pasta do usuário. As pastas criadas sao removidas no fim (T.done).
+local TMP = os.getenv("TMPDIR")
+if not TMP or TMP == "" then TMP = os.getenv("HOME") or "." end
+local DIRS = {}
 local function tmpdir(prefix)
   uid = uid + 1
-  local d = "/tmp/vk-ipc-" .. prefix .. "-" .. tostring(os.time()) .. "-" .. tostring(uid)
-  os.execute("mkdir -p '" .. d .. "'")
+  local d = TMP .. "/vk-ipc-" .. prefix .. "-" .. tostring(os.time()) .. "-" .. tostring(uid)
+  local ok = os.execute("mkdir -p '" .. d .. "'")
+  if ok ~= 0 and ok ~= true then
+    error("não consegui criar dir de teste: " .. d)
+  end
+  DIRS[#DIRS + 1] = d
   return d
 end
 
@@ -77,3 +86,4 @@ ipcloop()
 T.eq("status do comando = M.status()", t6.vim.statuses[#t6.vim.statuses], t6.ret.status())
 
 T.done("ipcloop")
+for _, d in ipairs(DIRS) do os.execute("rm -rf '" .. d .. "' 2>/dev/null") end
