@@ -30,6 +30,7 @@ local plugins = {
     "translate",   -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
     "scroll",      -- :scroll                  modo scroll (j/k rolam listas)
     "fzf",         -- :fzf <cmd>               navega lista na statusbar (j/k, enter roda)
+    "dicionario",  -- :dict                    corrige acentos/erros de digitação (PT)
   },
 
   -- ===== Temas (deixe descomentados só os que quiser alternar) =====

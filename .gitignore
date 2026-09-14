@@ -1,3 +1,4 @@
 *.o
 vk-ipcd
 *.apk
+plugins/dicionario/dados/
