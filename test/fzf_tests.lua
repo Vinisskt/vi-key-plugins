@@ -684,26 +684,11 @@ do
   eq("J11d linha", jl(t.vim.holds[#t.vim.holds]), "> ~storage/.secret.cfg")
 end
 
--- Fixture minima p/ carregar cat.lua na mesma sandbox (require("fzf") = t.mod)
-local function fresh_with(plugin, fs)
-  local t = fresh(fs)
-  local env = { vim = t.vim, termux = t.termux }
-  env.require = function(name)
-    if name == "termux" then return t.termux end
-    if name == "shell" then return { shq = shq } end
-    if name == "fzf" then return t.mod end
-  end
-  setmetatable(env, { __index = _G })
-  local chunk = assert(loadfile(plugin))
-  setfenv(chunk, env)
-  assert(chunk(), "carrega " .. plugin)
-  return t
-end
-
+-----------------------------------------------------------------------
 print("== K. Modo seletor (open_explorer c/ callback) ==")
 
 do
-  -- K1 seletor estilo :cat: navega ate um arquivo e o callback recebe ele
+  -- K1 seletor estilo open_explorer: navega ate um arquivo e o callback recebe ele
   local t = fresh(FS_D)
   local picked = {}
   t.mod.open_explorer(nil, function(p) picked[1] = p end)
@@ -732,7 +717,7 @@ do
   assert(hook(t2)("down"))
   assert(hook(t2)("enter"))                -- docs/
   assert(hook(t2)("enter"))                -- readme
-  ok("K3 :cat novo (sem callback) nao roda", #t2.termux.runs == 0)
+  ok("K3 sessao nova (sem callback) nao roda", #t2.termux.runs == 0)
   eq("K3b callback velho nunca chamou", n, 0)
 
   -- K4 run() c/ callback = seletor de linha: Enter entrega a linha escolhida
@@ -744,23 +729,6 @@ do
   assert(hook(t4)("enter"))
   eq("K4b linha entregue por callback", picked[1], "zip")
   eq("K4c e nada roda", #t4.termux.runs, 0)
-end
-
-print("== L. cat usa o fzf (âncora) ==")
-
-do
-  -- L1 :cat sem argumento abre o explorador na raiz do home
-  local t = fresh_with("plugins/cat.lua", FS_D)
-  local catf = assert(t.vim.registrations[#t.vim.registrations][2], "registry cat")
-  catf()
-  eq("L1 :cat abre explorador @~", head(t.vim.holds[#t.vim.holds]), "fzf 2/5  @~")
-  -- e o Enter num arquivo chama 'cat <abs>'
-  assert(hook(t)("enter"))                 -- storage/
-  assert(hook(t)("down"))
-  assert(hook(t)("down"))
-  assert(hook(t)("enter"))                 -- docs/
-  assert(hook(t)("enter"))                 -- readme
-  eq("L1b cat no arquivo escolhido", seqeq(t.termux.runs[1], { "cat " .. shq(HOME .. "/storage/docs/readme.md") }), true)
 end
 
 -----------------------------------------------------------------------

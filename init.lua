@@ -16,26 +16,10 @@ local plugins = {
 
   -- ===== Utilitários (usam a ponte :termux) =====
   utilitarios = {
-    "fzf",         -- fzf (âncora, sem comando): busca/seleção via API p/ :cat e demais
-    "cat",         -- :cat <caminho> ou só :cat (escolhe no explorador do fzf)
-    "rg",          -- :rg <padrão> [dir]      busca no home (Enter = linha do match)
-    "hist",        -- :hist                    re-executa comando do histórico (Ctrl-R)
-    "du",          -- :du [dir]                espaço por pasta/arquivo (Enter aprofunda)
-    "man",         -- :man <cmd> [seção]        página de manual do Linux
-    "snip",        -- :snip                      cola snippet de ~/.snippets no cursor
-    "ps",          -- :ps                        lista processos (Enter = kill <pid>)
-    "ip",          -- :ip                     endereços de rede
-    "which",       -- :which <prog...>        caminho de executáveis
-    "calc",        -- :calc <expr>            calculadora (Lua)
-    "battery",     -- :battery                nível/status da bateria
-    "sysinfo",     -- :sysinfo [net|cpu|mem|disk]
-    "todo",        -- :todo [add|del|done]    lista pessoal
-    "ping",        -- :ping <host>            latência de rede
-    "pkg",         -- :pkg <op> [alvos]       pacotes do Termux
-    "weather",     -- :weather [cidade]       previsão do tempo
-    "translate",   -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
-    "scroll",      -- :scroll                  modo scroll (j/k rolam listas)
-    "dicionario",  -- :dict                    autocorreção PT nativa offline (watcher)
+    "fzf",         -- fzf (âncora, sem comando): API de busca/seleção p/ quem integrar
+    "calc",        -- :calc <expr>      calculadora (Lua puro, sem termux)
+    "translate",   -- :tr [texto] | :tr -v  tradução PT<->EN (translate-shell)
+    "dicionario",  -- :dict             autocorreção PT nativa offline (watcher)
   },
 
   -- ===== Temas (deixe descomentados só os que quiser alternar) =====
