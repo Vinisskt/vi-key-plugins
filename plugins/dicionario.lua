@@ -227,22 +227,29 @@ function M.erro_permitido(n)
   return math.max(1, math.floor(n * 0.3))
 end
 
-function M.levenshtein(s, t)
+-- Damerau-Levenshtein: transposição de letras adjacentes (erro típico de
+-- digitação) custa 1. Só a-z (chaves sem acento), então byte == caractere.
+function M.damerau_levenshtein(s, t)
   local n, m = #s, #t
   if n == 0 then return m end
   if m == 0 then return n end
-  local v0, v1 = {}, {}
-  for j = 0, m do v0[j] = j end
+  -- 3 linhas rolantes: d2 = i-2 (p/ transposição), d1 = i-1, d0 = i.
+  local d2, d1, d0 = {}, {}, {}
+  for j = 0, m do d2[j], d1[j] = j, j end
   for i = 1, n do
-    v1[0] = i
-    local sb = s:byte(i)
+    local sb, sprev = s:byte(i), s:byte(i - 1)
+    d0[0] = i
     for j = 1, m do
       local cost = (sb == t:byte(j)) and 0 or 1
-      v1[j] = math.min(v1[j - 1] + 1, v0[j] + 1, v0[j - 1] + cost)
+      local v = math.min(d1[j] + 1, d0[j - 1] + 1, d1[j - 1] + cost)
+      if i > 1 and j > 1 and sb == t:byte(j - 1) and sprev == t:byte(j) then
+        v = math.min(v, d2[j - 2] + 1)
+      end
+      d0[j] = v
     end
-    v0, v1 = v1, v0
+    d2, d1, d0 = d1, d0, d2
   end
-  return v0[m]
+  return d1[m]
 end
 
 --- Corrige uma palavra completa. Devolve a forma canônica ou nil.
@@ -250,8 +257,9 @@ end
 --     ("voce" -> "você"); mas se a grafia DIGITADA é uma forma real e comum
 --     (frequência >= min_freq_nao_corrige), a palavra é preservada — nunca se
 --     troca uma grafia legítima por outra ("esta", "têm", "quê", "é", "à").
---  2. senão, fuzzy: Levenshtein <= erros permitidos dentro da faixa do
---     prefixo digitado (relaxando o prefixo em até 2 letras)
+--  2. senão, fuzzy: Damerau-Levenshtein <= erros permitidos dentro da faixa
+--     do prefixo digitado (relaxando o prefixo em até 3 letras). Empate de
+--     distância escolhe a palavra mais frequente (probabilidade unigrama).
 --  3. maiúsculas são puladas (nomes próprios), por padrão
 function M.corrigir_palavra(d, palavra)
   if not d or type(palavra) ~= "string" then return nil end
@@ -276,17 +284,28 @@ function M.corrigir_palavra(d, palavra)
   end
 
   local perm = M.erro_permitido(#chave)
-  local best, bdist = nil, perm + 1
-  for k = #chave, math.max(1, #chave - 2), -1 do
+  local best, bdist, bfreq = nil, perm + 1, -1
+  -- Prefixo relaxado até len-3: pega erro no meio da palavra ("palvra" ->
+  -- "palavra"); abaixo disso o risco de correção errada sobe de mais.
+  for k = #chave, math.max(1, #chave - 3), -1 do
     local lo, hi = M.intervalo_por_prefixo(d, 1, d.n, chave:sub(1, k))
     if lo <= hi then
       for i = lo, hi do
-        local dd = M.levenshtein(chave, chave_em(d, i))
-        if dd < bdist then
-          bdist, best = dd, i
+        local c = chave_em(d, i)
+        if math.abs(#c - #chave) <= perm then -- gate barato antes do DL
+          local dist = M.damerau_levenshtein(chave, c)
+          if dist <= perm then
+            -- Probabilidade (unigrama): frequência da grafia dominante.
+            -- Menor distância vence; empate vai para a mais frequente —
+            -- assim "paa" vira "para" (freq 1,9M) e não "pá" (freq 11k).
+            local fp, fa = freqs_em(d, i)
+            local freq = math.max(fp, fa)
+            if dist < bdist or (dist == bdist and freq > bfreq) then
+              best, bdist, bfreq = i, dist, freq
+            end
+          end
         end
       end
-      if best then break end
     end
   end
   if best then return canon_em(d, best) end

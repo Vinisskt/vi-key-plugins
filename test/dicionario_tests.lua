@@ -177,8 +177,69 @@ do
   eq("G. caza -> casa", F.corrigir_palavra(d, "caza"), "casa")
   eq("G. procurra -> procurar", F.corrigir_palavra(d, "procurra"), "procurar")
   eq("G. palavra já certa -> nada", F.corrigir_palavra(d, "faca"), nil)
-  eq("G. zerar dist", F.levenshtein("casa", "casa"), 0)
-  eq("G. dist 1", F.levenshtein("caza", "casa"), 1)
+  eq("G. zerar dist", F.damerau_levenshtein("casa", "casa"), 0)
+  eq("G. dist 1", F.damerau_levenshtein("caza", "casa"), 1)
+end
+
+-- ============ G2. ranking: menor distância, depois maior frequência =========
+-- "paa" empata em distância 1 com {pá, para, paz}; a frequência decide.
+do
+  local F = fresh().mod
+  local d = F.dados_de_linhas({
+    "pa\tpá\t100\t10000", "para\tpara\t1000000\t0", "paz\tpaz\t30000\t0",
+  })
+  eq("G2. paa -> para (freq desempata)", F.corrigir_palavra(d, "paa"), "para")
+  eq("G2. paa não vira pá", F.corrigir_palavra(d, "paa") ~= "pá", true)
+  eq("G2. para já certa", F.corrigir_palavra(d, "para"), nil)
+  eq("G2. paaz -> paz", F.corrigir_palavra(d, "paaz"), "paz")
+  -- distância continua mandando: "pparaa" (pede 2 edits) passa do orçamento
+  eq("G2. acima do orçamento -> nada", F.corrigir_palavra(d, "pparaa"), nil)
+end
+
+-- ============== G3. Damerau-Levenshtein (transposição custa 1) =============
+do
+  local F = fresh().mod
+  eq("G3. transposição ab<->ba", F.damerau_levenshtein("ab", "ba"), 1)
+  eq("G3. dist 1 por troca", F.damerau_levenshtein("caza", "casa"), 1)
+  -- "laoc" = "laço" com o "oc" trocado (transposição adjacente)
+  local d = F.dados_de_linhas({ "la", "laco\tlaço\t100\t900", "lao" })
+  eq("G3. laoc -> laço (transposição)", F.corrigir_palavra(d, "laoc"), "laço")
+end
+
+-- ========== G4. entradas hostis/de borda não quebram o fuzzy ==========
+do
+  local F = fresh().mod
+  local d = F.dados_de_linhas(LINHAS)
+  eq("G4. nil -> nada", F.corrigir_palavra(d, nil), nil)
+  eq("G4. vazia -> nada", F.corrigir_palavra(d, ""), nil)
+  eq("G4. números -> nada", F.corrigir_palavra(d, "123"), nil)
+  eq("G4. curta ignorada", F.corrigir_palavra(d, "p"), nil)
+end
+
+-- == G5. batelada de erros reais (índice embutido): letra faltando/errada ==
+do
+  local F = fresh()
+  local mod = F.mod
+  local d = mod._construir(embutido())
+  local pares = {
+    -- letra faltando (deleção)
+    { "csa", "casa" }, { "pesoa", "pessoa" }, { "palvra", "palavra" },
+    { "trabaho", "trabalho" }, { "computdor", "computador" },
+    { "escol", "escola" }, { "amig", "amigo" }, { "telefon", "telefone" },
+    { "janla", "janela" }, { "possive", "possível" },
+    { "importate", "importante" }, { "perguta", "pergunta" },
+    -- letra errada (substituição)
+    { "tembo", "tempo" }, { "munda", "mundo" }, { "felis", "feliz" },
+    { "poucu", "pouco" }, { "livrro", "livro" }, { "janele", "janela" },
+    { "mesno", "mesmo" }, { "aqi", "aqui" }, { "verdad", "verdade" },
+    -- negativos: palavra real é preservada; erro nas 3 primeiras letras não
+    -- entra (design conservador) e palavra desconhecida segue intacta
+    { "caza", nil }, { "quendo", nil }, { "zkxqv", nil },
+  }
+  for _, p in ipairs(pares) do
+    eq(("G5. %s -> %s"):format(p[1], p[2] or "nada"),
+      mod.corrigir_palavra(d, p[1]), p[2])
+  end
 end
 
 -- ================= H. ultima_palavra (offsets em bytes) =================
@@ -292,6 +353,23 @@ do
   vim.text = "olá zkxqv "
   mod.passada()
   eq("K. desconhecida não edita", #vim.replaces, 0)
+  -- "paa" no índice real: frequência desempata para "para" (não "pá")
+  vim.replaces = {}
+  vim.text = "olá paa "
+  mod.passada()
+  eq("K. paa corrigido 1x", #vim.replaces, 1)
+  if vim.replaces[1] then
+    eq("K. paa -> para", vim.replaces[1][3], "para ")
+  end
+  -- "pa" já é forma certa e "caza" é palavra real: não mexem
+  vim.replaces = {}
+  vim.text = "olá pa "
+  mod.passada()
+  eq("K. pa certo não edita", #vim.replaces, 0)
+  vim.replaces = {}
+  vim.text = "olá caza "
+  mod.passada()
+  eq("K. caza (real) não edita", #vim.replaces, 0)
   -- comandos com o índice real carregado
   F.cmd("nao")
   eq("K. :dict nao -> não", vim.statuses[#vim.statuses], "dicionário: nao → não")

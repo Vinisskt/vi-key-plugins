@@ -12,6 +12,26 @@ dicionário, ela é substituída pela forma canônica via `vim.replace`.
 - Os offsets do `vim.get_sel`/`vim.replace` são em **bytes** (UTF-8): o módulo
   anda por caracteres completos (`inicio_char`), nunca deixa cortar um acento.
 
+## Como escolhe a correção (mini-modelo)
+
+Regras simples com baixa taxa de erros, sem barra de sugestões:
+
+1. **Casa exata** da chave (sem acento) → aplica o acento canônico. Grafias
+   reais e comuns (`esta`, `têm`, `quê`) são preservadas pelo limiar de
+   frequência (`min_freq_nao_corrige`).
+2. Senão, **fuzzy**: candidatos dentro do orçamento dos 70%
+   (`erro_permitido`) e compartilhando o prefixo digitado (relaxado até 3
+   letras — pega erro no meio da palavra, como `palvra → palavra`), com
+   distância **Damerau-Levenshtein** (transposição de letras adjacentes conta
+   como 1 erro).
+3. Entre os candidatos: a **menor distância** vence; empate vai para a palavra
+   mais **frequente** (frequência da grafia dominante, já embutida no índice
+   em `freq_plana`/`freq_acentuada`). Por isso `paa → para` (freq 1,9M) e não
+   `pá` (freq 11k).
+
+A correção só acontece **depois** de a palavra ser comitada (espaço/pontuação)
+— nunca durante a digitação. Tudo offline, sem downloads e sem uso do daemon.
+
 ## Dados
 
 O índice vem **embutido** em `plugins/dicionario_dados.lua` (módulo Lua gerado,
