@@ -40,6 +40,7 @@ TELEFONE
 | `:weather [cidade]` | previsão do tempo (wttr.in) |
 | `:tr [texto]` | tradução PT↔EN (translate-shell/Google) |
 | `:scroll` | entra no modo SCROLL — j/k rolam listas, ESC volta ao modo INSERT |
+| `:dict` | corrige acentos/erros de digitação com o dicionário nativo de Português |
 | `:ipcloop` | status do daemon (heartbeat) |
 
 O teclado **nunca trava**: os plugins só escrevem/leem arquivos em
@@ -50,10 +51,14 @@ O teclado **nunca trava**: os plugins só escrevem/leem arquivos em
 Requisitos no Termux:
 
 ```sh
-pkg install clang translate-shell termux-api lua5.1  # sugestão; só no aparelho
+pkg install clang translate-shell termux-api lua5.1         # sugestão; só no aparelho
 termux-setup-storage
 pkg install termux-services   # se quiser o daemon sempre de pé (runit)
 ```
+
+O dicionário do `:dict` **já vem embutido** nos plugins
+(`plugins/dicionario_dados.lua`): nada é baixado, o `:dict` funciona 100%
+offline.
 
 Depois, do diretório deste repositório:
 
@@ -63,10 +68,11 @@ sh install.sh
 
 O `install.sh`:
 
-1. confere/instala o compilador (`cc` vem com `clang` — libc nativa do Android,
-   nada extra a instalar);
+1. confere o compilador (`cc` vem com `clang` — libc nativa do Android, nada
+   extra a instalar) e o `lua5.1` (runtime dos plugins);
 2. copia `init.lua` e `plugins/*.lua` para `/sdcard/keyboard-lua/` (pasta que o
-   teclado lê) e garante a pasta `data/`;
+   teclado lê) e garante a pasta `data/` — o dicionário do `:dict` vai junto
+   embutido em `plugins/dicionario_dados.lua`;
 3. compila o daemon `daemon/daemon.c` → `$PREFIX/bin/vk-ipcd`;
 4. instala o serviço runit `vk-ipc` apontando para o binário (com o daemon Lua
    antigo como fallback) e o **(re)inicia**;
@@ -115,6 +121,26 @@ Sintaxe geral: digite `:` no teclado e o nome do comando.
 - para voltar a digitar, pressione `ESC` ou `i` (volta ao modo INSERT);
 - útil quando o foco está no campo de texto mas você quer rolar a lista por
   trás.
+
+### Sobre o `:dict`
+
+Autocorreção de Português **sem sugestões**: só substitui. Ao terminar uma
+palavra (espaço/pontuação), se ela casa com o dicionário com ≥70% de
+similaridade, vira a forma correta com acento (`voce`→`você`, `nao`→`não`).
+Enquanto você digita, o índice é **cortado pela metade** com busca binária pelo
+prefixo já escrito — a correção só olha a faixa restante. O dicionário vem
+**embutido nos plugins** (`plugins/dicionario_dados.lua`, ~48k palavras
+indexadas): funciona 100% offline, sem baixar nada no aparelho.
+
+- `:dict` — estado;
+- `:dict on|off` — liga/desliga (vem ligado por padrão);
+- `:dict status` — caminho do índice, nº de palavras, limite de tamanho;
+- `:dict <palavra>` — mostra a correção que seria aplicada (não edita texto).
+
+Palavras de ≤3 letras e iniciadas com MAIÚSCULA (nomes próprios) não são
+tocadas por padrão. Configurável no topo do `plugins/dicionario.lua`
+(`min_len`, `pular_maiuscula`, `intervalo_ms`...). O watcher roda no
+`vim.interval` do teclado e nunca toca em textos com seleção ativa.
 
 ## Arquitetura — protocolo dos arquivos
 
@@ -170,6 +196,7 @@ Para testar sem o teclado, rode o daemon na mão e use o harness:
 ```sh
 sv up vk-ipc                          # ou: $PREFIX/bin/vk-ipcd
 lua5.1 plugins/cat.lua                # sintaxe das plugins (carrega teste?)
+./test/run.sh                         # suíte completa (mocks de vim, lua5.1)
 ```
 
 ## Problemas comuns

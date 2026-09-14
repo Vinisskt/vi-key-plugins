@@ -35,6 +35,7 @@ local plugins = {
     "weather",     -- :weather [cidade]       previsão do tempo
     "translate",   -- :tr [texto] | :tr -v    tradução PT<->EN (translate-shell)
     "scroll",      -- :scroll                  modo scroll (j/k rolam listas)
+    "dicionario",  -- :dict                    autocorreção PT nativa offline (watcher)
   },
 
   -- ===== Temas (deixe descomentados só os que quiser alternar) =====

@@ -27,6 +27,7 @@ need() { # need <comando> <pacote> <aviso>
 }
 need cc clang "o install.sh compila o daemon em C com o clang do Termux"
 need sh termux-services "(já vem no Termux; usado pelo runit p/ supervisionar)"
+need lua5.1 lua5.1 "mesmo runtime do teclado; roda o daemon Lua (fallback) e os testes"
 # opcionais com aviso:
 command -v trans >/dev/null 2>&1 || {
   echo "  (opcional) trans não instalado — :tr pede: pkg install translate-shell"
@@ -38,7 +39,7 @@ command -v curl >/dev/null 2>&1 || {
   echo "  (opcional) curl não instalado — :weather pede: pkg install curl"
 }
 if [ "$MISSING_DEPS" = 1 ]; then
-  echo "!! instale o(s) pacote(s) que faltam e rode de novo: pkg install clang ..."
+  echo "!! instale o(s) pacote(s) que faltam e rode de novo: pkg install clang lua5.1 ..."
   exit 1
 fi
 
@@ -46,6 +47,7 @@ echo "== 2/5 copiando plugins p/ $KEYBOARD_LUA =="
 mkdir -p "$KEYBOARD_LUA/plugins" "$KEYBOARD_LUA/data"
 cp "$SCRIPT_DIR/init.lua" "$KEYBOARD_LUA/"
 cp "$SCRIPT_DIR"/plugins/*.lua "$KEYBOARD_LUA/plugins/"
+# o dicionário do :dict vem embutido (plugins/dicionario_dados.lua): nada p/ baixar.
 
 echo "== 3/5 compilando daemon =="
 cc -O2 -Wall -Wextra -o "$PREFIX/bin/vk-ipcd" "$SCRIPT_DIR/daemon/daemon.c"

@@ -20,6 +20,7 @@ run test/termux_tests.lua
 run test/translate_tests.lua
 run test/commands_tests.lua
 run test/tools_tests.lua
+run test/dicionario_tests.lua
 run test/themes_tests.lua
 run test/ipcloop_tests.lua
 run test/smoke_tests.lua
