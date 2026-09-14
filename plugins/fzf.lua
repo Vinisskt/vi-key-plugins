@@ -1,16 +1,22 @@
--- fzf.lua — :fzf [comando] — navegador de lista na statusbar.
--- Comando:
---   :fzf                    lista a raiz do Termux (~, onde mora o storage/);
---                           é um explorador: Enter em "dir/" entra, ".." sobe
---                           e arquivo roda como comando
---   :fzf <comando>          lista a saída do comando (ex.: :fzf pkg list-installed)
+-- fzf.lua — API de busca/seleção de lista na statusbar (âncora, NÃO é comando).
+-- O fzf apenas navega e filtra listas (diretórios no explorador, ou a saída de
+-- um comando) e entrega a escolha por CALLBACK. Ele nunca roda nada sozinho:
+-- quem age é o plugin que o chama (ex.: :cat escolhe um arquivo e o cat lê).
+--
+-- APIs:
+--   fzf.open_explorer([caminho], on_pick)   explorador; Enter num ARQUIVO chama
+--                                           on_pick(caminho_absoluto); em pasta
+--                                           segue navegando; sem on_pick, Enter
+--                                           num arquivo só fecha (nada roda).
+--   fzf.run({comando...}, on_pick)          lista a saída do comando e chama
+--                                           on_pick(linha_escolhida) no Enter.
 --
 -- Teclas durante a navegação/filtro:
 --   setas ^/v      move o cursor (letras ficam livres para o filtro)
 --   digitar        filtra a lista em tempo real (sem diferenciar maiúsculas)
 --   space          digita espaço no filtro
 --   backspace      apaga o último caractere do filtro
---   enter          (explorador) entra/subir/rodar | (comando) roda a linha
+--   enter          (explorador) entra/Sobe | (arquivo/linha c/ callback) entrega
 --   esc            limpa o filtro; esc de novo sai (sem rodar nada)
 local termux = require("termux")
 local sh = require("shell")
@@ -88,7 +94,7 @@ local function window_lines()
     head = head .. "  @~"
   elseif explorer then
     head = head .. "  @" .. clip(display(base))
-  else
+  elseif pick_cb then
     head = head .. "  enter roda"
   end
   if query ~= "" then
@@ -309,10 +315,10 @@ local function run_selected()
     stop()
     vim.set_mode("insert")
   end
+  -- Entrega a escolha SÓ por callback. Sem on_pick, Enter fecha a lista e
+  -- volta pro insert: o fzf é uma âncora e nunca executa nada por conta.
   if cb then
     cb(path)
-  else
-    termux.run({ path })
   end
 end
 
@@ -397,35 +403,43 @@ local function start_home()
   enter_dir(home_root)  -- home cacheado: so executa a listagem
 end
 
-function M.run(args)
-  if #args == 0 then
-    if not vim.key_hook then
-      vim.status("fzf: requer atualização do teclado (vim.key_hook)")
-      return
-    end
-    pick_cb = nil
-    start_home()
-    return
-  end
+function M.run(args, on_pick)
   if not vim.key_hook then
     vim.status("fzf: requer atualização do teclado (vim.key_hook)")
     return
   end
-  pick_cb = nil
-  local out = termux.exec(table.concat(args, " "))
-  if out == nil or out == "" then
-    vim.status("fzf: sem resultado (comando >6s ou nada na saída)")
+  pick_cb = on_pick or nil
+  if #args == 0 then
+    start_home()
     return
   end
-  open_list(out, false, nil)
+  -- Lista a saída do comando SEM travar o teclado (exec_async; quando a API
+  -- não existe, o sync cai no exec de sempre).
+  local my = session
+  local cmd = table.concat(args, " ")
+  local finish = function(out)
+    if session ~= my then return end
+    if out == nil or out == "" then
+      vim.status("fzf: sem resultado (comando >6s ou nada na saída)")
+      return
+    end
+    open_list(out, false, nil)
+  end
+  if termux.exec_async then
+    termux.exec_async(cmd, finish)
+  else
+    finish(termux.exec(cmd))
+  end
 end
 
--- API para outros plugins:
---   fzf.open_explorer()                 explorador na raiz do home
---   fzf.open_explorer(caminho)          explorador enraizado em [caminho]
---   fzf.open_explorer(caminho, cb)      MODO SELETOR: Enter num ARQUIVO chama
---                                       cb(caminho_absoluto); em pasta segue
---                                       navegando; esc sai sem chamar nada.
+-- API para outros plugins (fzf é âncora: nunca roda nada, só entrega por callback):
+--   fzf.open_explorer()                     explorador na raiz do home
+--   fzf.open_explorer(caminho[, on_pick])   explorador enraizado em [caminho];
+--                                           Enter num ARQUIVO chama on_pick(caminho
+--                                           absoluto), em pasta segue navegando;
+--                                           sem callback, arquivo só fecha.
+--   fzf.run({comando...}[, on_pick])        lista a saída do comando e chama
+--                                           on_pick(linha) no Enter.
 function M.open_explorer(start, on_pick)
   if not vim.key_hook then
     vim.status("fzf: requer atualização do teclado (vim.key_hook)")
@@ -439,5 +453,5 @@ function M.open_explorer(start, on_pick)
   end
 end
 
-vim.register("fzf", function(...) M.run({...}) end)
+-- Sem comando registrado: o fzf entra só via API (require("fzf")) pelas âncoras.
 return M

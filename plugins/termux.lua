@@ -13,6 +13,13 @@ local DATA = "/sdcard/keyboard-lua/data"
 
 local M = {}
 
+-- Pontos de extensão p/ testes: trocar o diretório de dados (data/ temporária)
+-- e injetar o relógio (os.time tem resolução de 1s — os testes simulam
+-- conclusão/timeout sem esperar de verdade).
+function M.set_data(dir) DATA = dir end
+function M.get_data() return DATA end
+M._now = os.time
+
 local function read_file(path)
   local f = io.open(path, "r")
   if not f then return nil end
@@ -35,7 +42,11 @@ local FOLLOW_LINES = 5
 local status = vim.status_hold or vim.status
 
 -- Últimas [n] linhas de [s] (a saída cresce — a primeira sempre cai).
+-- Tira o \n final ANTES: sem isso a captura vazia entra na conta e o resultado
+-- vinha com n-1 linhas reais + um \n sobrando (acúmulo no status do follow).
 local function tail_lines(s, n)
+  s = (s or ""):gsub("\n+$", "")
+  if s == "" then return "" end
   local t = {}
   for line in (s .. "\n"):gmatch("(.-)\n") do
     t[#t + 1] = line
@@ -48,9 +59,17 @@ local function tidy(s)
   return s and s:gsub("%s+$", "") or ""
 end
 
+-- Concluído = cmd e busy ausentes (o daemon tomou o cmd e terminou). Virou
+-- hook p/ os testes injetarem o estado "pronto" sem os 6s reais do os.time.
+local function daemon_done()
+  return read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil
+end
+M._daemon_done = daemon_done
+M._tail_lines = tail_lines
+
 local function follow_tick()
   local out = tidy(read_file(DATA .. "/out") or "")
-  local done = read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil
+  local done = M._daemon_done()
   if out ~= follow_last then
     follow_last = out
     status(out == "" and "termux: processando..." or tail_lines(out, FOLLOW_LINES))
@@ -64,7 +83,7 @@ local function follow_tick()
   -- Daemon morreu no meio do comando? (busy preso sem heartbeat) -> avisa e para.
   local hb = tonumber(read_file(DATA .. "/heartbeat")) or 0
   local last = tonumber(read_file(DATA .. "/last-start")) or 0
-  local now = os.time()
+  local now = M._now()
   if now - hb > 6 and now - last > 6 then
     vim.clear_interval(follow_handle)
     follow_handle = nil
@@ -87,6 +106,21 @@ local function follow_start()
   follow_handle = vim.interval(300, follow_tick)
 end
 
+-- Escreve o comando na fila (tmp + rename atômico) e limpa o follow. nil = ok;
+-- "erro" = sem acesso a data/.  (Declarado após follow_stop: o Lua resolve
+-- upvalues no ponto do load, então submit não podia enxergar a função antes.)
+local function submit(cmd)
+  local tmp = DATA .. "/cmd.tmp"
+  local f = io.open(tmp, "w")
+  if not f then return "erro" end
+  f:write(cmd .. "\n")
+  f:close()
+  os.remove(DATA .. "/cmd")
+  os.rename(tmp, DATA .. "/cmd")
+  follow_stop()
+  return nil
+end
+
 -- Roda um comando e devolve a saída como texto (nil se sem-resposta). NÃO
 -- mostra nada — o chamador decide (usado por tr.lua p/ capturar o resultado).
 function M.exec(input)
@@ -94,26 +128,18 @@ function M.exec(input)
   if type(input) ~= "table" then args = { input } end
   local cmd = table.concat(args, " ")
   if cmd == "" then return nil end
-  local tmp = DATA .. "/cmd.tmp"
-  local f = io.open(tmp, "w")
-  if not f then
+  if submit(cmd) then
     vim.status("falta data/ (rode ipc-loop.lua no Termux)")
     return nil
   end
-  f:write(cmd .. "\n")
-  f:close()
-  os.remove(DATA .. "/cmd")
-  os.rename(tmp, DATA .. "/cmd")
-  follow_stop()
-  local t0 = os.time()
-  while os.time() - t0 < 6 do
-    if read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil then
-      return tidy(read_file(DATA .. "/out") or "")
-    end
+  local t0 = M._now()
+  while not M._daemon_done() and M._now() - t0 < 6 do end
+  if M._daemon_done() then
+    return tidy(read_file(DATA .. "/out") or "")
   end
   local hb = tonumber(read_file(DATA .. "/heartbeat")) or 0
   local last = tonumber(read_file(DATA .. "/last-start")) or 0
-  local now = os.time()
+  local now = M._now()
   if now - last <= 8 or now - hb <= 8 then
     follow_start()
   else
@@ -138,28 +164,21 @@ function M.exec_async(input, ondone)
     ondone(M.exec(cmd))
     return
   end
-  local tmp = DATA .. "/cmd.tmp"
-  local f = io.open(tmp, "w")
-  if not f then
+  if submit(cmd) then
     vim.status("falta data/ (rode ipc-loop.lua no Termux)")
     ondone(nil)
     return
   end
-  f:write(cmd .. "\n")
-  f:close()
-  os.remove(DATA .. "/cmd")
-  os.rename(tmp, DATA .. "/cmd")
-  follow_stop()
-  local t0 = os.time()
+  local t0 = M._now()
   local h
   h = vim.interval(50, function()
-    if read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil then
+    if M._daemon_done() then
       vim.clear_interval(h)
       ondone(tidy(read_file(DATA .. "/out") or ""))
-    elseif os.time() - t0 > 6 then
+    elseif M._now() - t0 > 6 then
       local hb = tonumber(read_file(DATA .. "/heartbeat")) or 0
       local last = tonumber(read_file(DATA .. "/last-start")) or 0
-      local now = os.time()
+      local now = M._now()
       if now - last > 8 and now - hb > 8 then
         vim.clear_interval(h)
         vim.status("termux sem resposta (rode ipc-loop.lua no Termux)")
@@ -198,32 +217,24 @@ function M.run(input)
     M.show()
     return
   end
-  local tmp = DATA .. "/cmd.tmp"
-  local f = io.open(tmp, "w")
-  if not f then
+  if submit(cmd) then
     vim.status("falta data/ (rode ipc-loop.lua no Termux)")
     return
   end
-  f:write(cmd .. "\n")
-  f:close()
-  os.remove(DATA .. "/cmd")
-  os.rename(tmp, DATA .. "/cmd")
-  follow_stop()
 
   -- Espera o daemon tomar o cmd (mv cmd -> busy; timeout ~3s de tempo real).
   -- "concluído" = cmd e busy ausentes; busy presente = comando em execução.
-  local t0 = os.time()
-  while os.time() - t0 < 3 do
-    if read_file(DATA .. "/busy") == nil and read_file(DATA .. "/cmd") == nil then
-      M.show()
-      return
-    end
+  local t0 = M._now()
+  while not M._daemon_done() and M._now() - t0 < 3 do end
+  if M._daemon_done() then
+    M.show()
+    return
   end
   -- Ainda pendente: diferencia comando longo (daemon trabalhou nele) de
   -- daemon morto. last-start é gravado pelo daemon ao começar a executar.
   local hb = tonumber(read_file(DATA .. "/heartbeat")) or 0
   local last = tonumber(read_file(DATA .. "/last-start")) or 0
-  local now = os.time()
+  local now = M._now()
   if now - last <= 4 or now - hb <= 4 then
     follow_start()
   else

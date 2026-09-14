@@ -110,9 +110,11 @@ local function fresh(fs, opts)
   local chunk = assert(loadfile(PLUGIN))
   setfenv(chunk, env)
   local mod = assert(chunk(), "plugin carrega")
-  local reg = vim.registrations[1]
-  assert(reg and reg[1] == "fzf" and type(reg[2]) == "function", "vim.register(fzf, fn)")
-  return { vim = vim, termux = termux, cmd = reg[2], mod = mod }
+  assert(#vim.registrations == 0, "fzf e API pura: nao registra comando")
+  -- O fzf virou ancora (sem comando). O "cmd" abaixo repete o papel do antigo
+  -- ":fzf" como atalho p/ a API run({}) e deixa os testes de comportamento
+  -- (navegacao, filtro, cabecalho) iguais aos de um plugin que o chama.
+  return { vim = vim, termux = termux, cmd = function(...) mod.run({ ... }) end, mod = mod }
 end
 
 -- Helpers de inspeção sobre a última janela renderizada.
@@ -146,7 +148,7 @@ print("== A. Carga e registros ==")
 
 do
   local t = fresh({})
-  eq("A1 registrou exatamente 'fzf'", #t.vim.registrations, 1)
+  eq("A1 fzf nao registra comando (API pura)", #t.vim.registrations, 0)
   eq("A2 sem key_hook: run() bloqueia e avisa", (function()
     local t2 = fresh({}, { no_key_hook = true })
     t2.vim.statuses = {}
@@ -166,7 +168,7 @@ do
 end
 
 -----------------------------------------------------------------------
-print("== B. Explorador ':fzf' — saida esperada ==")
+print("== B. Explorador (API run) — saida esperada ==")
 
 local FS_B = {
   [homef()] = HOME .. "\n" .. "storage/\nbin/\nprojetos\nnotas.txt",
@@ -218,23 +220,23 @@ do
 end
 
 -----------------------------------------------------------------------
-print("== C. ':fzf <comando>' — saida esperada ==")
+print("== C. API run({comando}) — saida esperada ==")
 
 local FS_C = { ["pkg list-installed"] = "alsa-utils\nzip\nzsh" }
 do
   local t = fresh(FS_C)
   t.cmd("pkg", "list-installed")
   eq("C1 exec exatamente o comando", t.termux.calls[1], "pkg list-installed")
-  eq("C2 header 1/3 sem @", head(t.vim.holds[#t.vim.holds]), "fzf 1/3  enter roda")
+  eq("C2 header 1/3 sem @ (sem callback: nada roda)", head(t.vim.holds[#t.vim.holds]), "fzf 1/3")
   local r = rows(t.vim.holds[#t.vim.holds])
   eq("C3 primeira linha selecionada", r[1], "> alsa-utils")
-  eq("C4 sem '..' no modo comando", (function() assert(hook(t)("down")); assert(hook(t)("down")); assert(hook(t)("enter")); return seqeq(t.termux.runs[1], { "zsh" }) end)(), true)
+  eq("C4 enter sem callback: nada roda", (function() assert(hook(t)("down")); assert(hook(t)("down")); assert(hook(t)("enter")); return #t.termux.runs == 0 end)(), true)
   eq("C4b enter: hook limpo + modo insert", t.vim.nhook == 2 and t.vim.modes[#t.vim.modes] == "insert", true)
 
   local t2 = fresh(FS_C)
   t2.cmd("pkg", "list-installed")
   assert(hook(t2)("enter"))
-  eq("C5 enter roda a primeira linha", seqeq(t2.termux.runs[1], { "alsa-utils" }), true)
+  eq("C5 enter sem callback nao roda", #t2.termux.runs, 0)
 
   local t3 = fresh(FS_C)
   t3.cmd("pkg", "list-installed")
@@ -277,7 +279,7 @@ do
   eq("D2b header", head(t.vim.holds[#t.vim.holds]), "fzf 2/3  @~/storage/docs/")
   -- roda readme (cur=2) — caminho absoluto (antes: 'readme.md' relativo ao HOME)
   assert(hook(t)("enter"))
-  eq("D3 arquivo roda com caminho absoluto", seqeq(t.termux.runs[1], { HOME .. "/storage/docs/readme.md" }), true)
+  eq("D3 arquivo sem callback: nada roda", #t.termux.runs, 0)
   eq("D3b hook limpo + insert", t.vim.hooks[t.vim.nhook] == nil and t.vim.modes[#t.vim.modes] == "insert", true)
 
   -- sobe de ~/storage/docs
@@ -356,7 +358,7 @@ do
     for i = 1, 250 do many[#many + 1] = "item-" .. i end
     local t6 = fresh({ ["many"] = table.concat(many, "\n") })
     t6.cmd("many")
-    eq("E6 cabe em 200", head(t6.vim.holds[#t6.vim.holds]), "fzf 1/200  enter roda")
+    eq("E6 cabe em 200", head(t6.vim.holds[#t6.vim.holds]), "fzf 1/200")
     local h6 = hook(t6)
     for _ = 1, 199 do assert(h6("down")) end
     eq("E6b cursor no ultimo, visivel", curitem(t6.vim.holds[#t6.vim.holds]), "item-200")
@@ -394,7 +396,7 @@ do
   do
     local t10 = fresh({ ["crlf"] = "alpha\r\nbeta\r\n" })
     t10.cmd("crlf")
-    eq("E10 CRLF vira 2 itens", head(t10.vim.holds[#t10.vim.holds]), "fzf 1/2  enter roda")
+    eq("E10 CRLF vira 2 itens", head(t10.vim.holds[#t10.vim.holds]), "fzf 1/2")
   end
 end
 
@@ -446,7 +448,7 @@ do
   -- H1 linha vazia no meio nao vira item
   local t = fresh({ ["miolo"] = "a\n\nb" })
   t.cmd("miolo")
-  eq("H1 linha vazia no meio ignorada", head(t.vim.holds[#t.vim.holds]), "fzf 1/2  enter roda")
+  eq("H1 linha vazia no meio ignorada", head(t.vim.holds[#t.vim.holds]), "fzf 1/2")
 
   -- H2 explorador com 300 itens -> 200 itens + ".." no topo
   local many = {}
@@ -492,7 +494,7 @@ eq("H3c cauda do path preservada", hh:sub(-8), string.sub("~/" .. longname .. "/
   t6.cmd()
   eq("H6 um arquivo + .. = 2 itens", head(t6.vim.holds[#t6.vim.holds]), "fzf 2/2  @~")
   assert(hook(t6)("enter"))
-  eq("H6b roda o arquivo (absoluto)", seqeq(t6.termux.runs[1], { HOME .. "/solo.txt" }), true)
+  eq("H6b arquivo sem callback: nada roda", #t6.termux.runs, 0)
 
   -- H7 diretorio cujo item termina com "/" dir com espaco e enter repetido em .. (sobe ate / e fica)
   local t7 = fresh(home_chain_fs())
@@ -513,9 +515,9 @@ do
   t.cmd("pkg", "list-installed")
   assert(hook(t)("z"))
   assert(hook(t)("s"))
-  eq("I1 modo comando filtra", head(t.vim.holds[#t.vim.holds]), "fzf 1/1  enter roda  'zs'")
+  eq("I1 modo comando filtra", head(t.vim.holds[#t.vim.holds]), "fzf 1/1  'zs'")
   assert(hook(t)("enter"))
-  eq("I1b roda o filtrado", seqeq(t.termux.runs[1], { "zsh" }), true)
+  eq("I1b enter sem callback nao roda", #t.termux.runs, 0)
   eq("I1c sem find (modo comando)", t.termux.calls[#t.termux.calls], "pkg list-installed")
 end
 
@@ -525,14 +527,14 @@ do
   t.cmd("pkg", "list-installed")
   for _, c in ipairs({ "Z", "S" }) do assert(hook(t)(c)) end
   assert(hook(t)("enter"))
-  eq("I2 case-insensitive roda zsh", seqeq(t.termux.runs[1], { "zsh" }), true)
+  eq("I2 case-insensitive filtra, enter nao roda", #t.termux.runs, 0)
 
   local t2 = fresh({ ["pkg list-installed"] = "alsa-utils\nzip\nzsh" })
   t2.cmd("pkg", "list-installed")
   assert(hook(t2)("z"))
   assert(hook(t2)("s"))
   assert(hook(t2)("back"))
-  eq("I3 backspace volta p/ 'z' (2 matches)", head(t2.vim.holds[#t2.vim.holds]), "fzf 1/2  enter roda  'z'")
+  eq("I3 backspace volta p/ 'z' (2 matches)", head(t2.vim.holds[#t2.vim.holds]), "fzf 1/2  'z'")
 end
 
 -----------------------------------------------------------------------
@@ -560,7 +562,7 @@ do
 
   -- J2 enter roda o arquivo pelo caminho absoluto
   assert(hook(t)("enter"))
-  eq("J2 roda o arquivo absoluto", seqeq(t.termux.runs[1], { HOME .. "/storage/calc.txt" }), true)
+  eq("J2 enter sem callback: nada roda", #t.termux.runs, 0)
 
   -- J2b seta move o cursor nos resultados da busca
   local t2 = fresh(FS_J)
@@ -569,7 +571,7 @@ do
   assert(hook(t2)("down"))
   eq("J2b down assume 2o resultado", curitem(t2.vim.holds[#t2.vim.holds]), "docs.txt")
   assert(hook(t2)("enter"))
-  eq("J2c roda o do resultado", seqeq(t2.termux.runs[1], { HOME .. "/docs.txt" }), true)
+  eq("J2c enter sem callback: nada roda", #t2.termux.runs, 0)
 
   -- J3 limpar o filtro volta para a lista do diretório
   local t3 = fresh(FS_J)
@@ -723,18 +725,28 @@ do
   assert(hook(t2)("esc"))
   eq("K2b esc sai sem chamar", n, 0)
 
-  -- K3 esc descarta o callback: um :fzf novo (sem picker) roda o arquivo
+  -- K3 esc descarta o callback: sessao nova (sem picker) nao roda NADA
   t2.cmd()
   assert(hook(t2)("enter"))                -- storage/
   assert(hook(t2)("down"))
   assert(hook(t2)("down"))
   assert(hook(t2)("enter"))                -- docs/
   assert(hook(t2)("enter"))                -- readme
-  ok("K3 :fzf novo roda, nao picka", seqeq(t2.termux.runs[1], { HOME .. "/storage/docs/readme.md" }))
+  ok("K3 :cat novo (sem callback) nao roda", #t2.termux.runs == 0)
   eq("K3b callback velho nunca chamou", n, 0)
+
+  -- K4 run() c/ callback = seletor de linha: Enter entrega a linha escolhida
+  local t4 = fresh({ ["pkg list-installed"] = "alsa-utils\nzip\nzsh" })
+  local picked = {}
+  t4.mod.run({ "pkg", "list-installed" }, function(line) picked[1] = line end)
+  eq("K4 header 'enter roda' so com callback", head(t4.vim.holds[#t4.vim.holds]), "fzf 1/3  enter roda")
+  assert(hook(t4)("down"))
+  assert(hook(t4)("enter"))
+  eq("K4b linha entregue por callback", picked[1], "zip")
+  eq("K4c e nada roda", #t4.termux.runs, 0)
 end
 
-print("== L. cat/files usam o fzf ==")
+print("== L. cat usa o fzf (âncora) ==")
 
 do
   -- L1 :cat sem argumento abre o explorador na raiz do home
@@ -749,15 +761,6 @@ do
   assert(hook(t)("enter"))                 -- docs/
   assert(hook(t)("enter"))                 -- readme
   eq("L1b cat no arquivo escolhido", seqeq(t.termux.runs[1], { "cat " .. shq(HOME .. "/storage/docs/readme.md") }), true)
-
-  -- L2 :files sem argumento abre @~; :files /sdcard/Download abre naquele dir
-  local t2 = fresh_with("plugins/files.lua", { [ls("/sdcard/Download")] = "foto.jpg\nvideos/", [homef()] = HOME .. "\nnotas.txt" })
-  local filesf = assert(t2.vim.registrations[#t2.vim.registrations][2], "registry files")
-  filesf()
-  eq("L2 :files abre @~", head(t2.vim.holds[#t2.vim.holds]), "fzf 2/2  @~")
-  assert(hook(t2)("esc"))
-  filesf("/sdcard/Download")
-  eq("L2b :files <dir> abre naquele dir", head(t2.vim.holds[#t2.vim.holds]), "fzf 2/3  @/sdcard/Download")
 end
 
 -----------------------------------------------------------------------

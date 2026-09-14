@@ -40,4 +40,19 @@ vim.register("gruvbox", function(arg)
   vim.status("tema padrão (gruvbox)")
 end)
 
+-- :theme é registrado SÓ AQUI (tema padrão): antes dracula.lua e tokyo.lua
+-- registravam o mesmo nome e quem carregava por último venceria o binding.
+vim.register("theme", function(arg)
+  if not arg or arg == "" then
+    vim.status("tema atual: " .. vim.current_theme())
+    return
+  end
+  if arg == "default" or arg == "gruvbox" or arg == "off" then
+    vim.set_theme("")
+    vim.status("tema padrão (gruvbox)")
+  else
+    vim.set_theme(arg)
+  end
+end)
+
 return {}

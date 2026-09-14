@@ -35,8 +35,12 @@ local function trans_cmd(args)
     .. "; else echo '" .. MISSING .. "'; fi"
 end
 
+-- Pivôs acentuados: `%a` no locale C só casa ASCII — "é"/"não"/"está" nunca
+-- contariam na varredura por palavra. Detecta por substring pura no texto cru.
+local PT_RAW = { "é", "não", "está", "só" }
 -- Direção por contagem de palavras-pivô (pt > en => "pt", senão "en").
 local function heur_src(text)
+  text = text or ""
   local words = {}
   for w in text:lower():gmatch("%a+") do words[#words + 1] = w end
   local pt, en = 0, 0
@@ -47,17 +51,20 @@ local function heur_src(text)
     if pset[w] then pt = pt + 1 end
     if eset[w] then en = en + 1 end
   end
+  for _, w in ipairs(PT_RAW) do
+    if text:find(w, 1, true) then pt = pt + 1 end
+  end
   return (pt > en) and "pt" or "en"
 end
 
--- Detecta o idioma-fonte via trans. Devolve "pt", "en", ou nil com motivo:
+-- Detecta o idioma-fonte a partir da SAÍDA do trans (parte pura, testável).
+-- Devolve "pt", "en", ou nil com motivo:
 --   "net"      sem resposta/erro de rede
 --   "missing"  trans não instalado
 --   "detec"    idioma detectado não é pt/en (segue por heurística)
 -- Como identificador: "Portugu" (pt) tem prioridade; "English" só prossegue
 -- se não houver nada em português antes (a descrição pt não cita "English").
-local function identify(text)
-  local out = termux.exec(trans_cmd("-identify -no-ansi " .. sh.shq(text)))
+local function identify_out(out)
   if not out or out == "" then return nil, "net" end
   if out == MISSING then return nil, "missing" end
   local first = (out:match("^[^\n]+") or ""):gsub(ANSI, ""):gsub("^%s+", "")
@@ -66,10 +73,16 @@ local function identify(text)
   return nil, "detec", first
 end
 
-local function do_translate(text, src)
-  local dst = (src == "pt") and "en" or "pt"
-  return termux.exec(trans_cmd("-b -no-ansi -s " .. src .. " -t " .. dst
-    .. " " .. sh.shq(text)))
+-- Roda o trans -identify e entrega via ondone(src, why, detected). Prefere
+-- exec_async (o teclado nunca fica preso na espera síncrona); sem a API, cai
+-- para o exec de sempre.
+local function identify(text, ondone)
+  local cmd = trans_cmd("-identify -no-ansi " .. sh.shq(text))
+  if termux.exec_async then
+    termux.exec_async(cmd, function(out) ondone(identify_out(out)) end)
+  else
+    ondone(identify_out(termux.exec(cmd)))
+  end
 end
 
 -- Limpa a saída do trans; devolve nil se for erro/identidade.
@@ -84,10 +97,55 @@ local function clean_trans(out, original)
   return s
 end
 
+-- Traduz [text] para o oposto de [src] já limpo: ondone(out); out = nil se
+-- o trans falhou ou devolveu o próprio original.
+local function do_translate(text, src, ondone)
+  local dst = (src == "pt") and "en" or "pt"
+  local cmd = trans_cmd("-b -no-ansi -s " .. src .. " -t " .. dst
+    .. " " .. sh.shq(text))
+  if termux.exec_async then
+    termux.exec_async(cmd, function(out) ondone(clean_trans(out, text)) end)
+  else
+    ondone(clean_trans(termux.exec(cmd), text))
+  end
+end
+
+-- Tenta [src] e, se o resultado for improvável (erro/idêntico), a direção
+-- contrária. Entrega o texto final via ondone(out).
+local function translate_for_real(text, src, ondone)
+  do_translate(text, src, function(out)
+    if out then ondone(out); return end
+    do_translate(text, (src == "pt") and "en" or "pt", ondone)
+  end)
+end
+
+-- Aplica o resultado no app (substitui seleção / insere no cursor / troca
+-- tudo), mostra só (page/status), e lança o status de confirmação.
+local function finish(out, truncated, visual, sel0, sel1, has_args)
+  if not out then
+    vim.status(":tr — sem tradução")
+    return
+  end
+  if truncated then out = out .. "\n(porção inicial traduzida)" end
+  if visual then
+    if #out > 300 then vim.page(out) else vim.status(out) end
+    return
+  end
+  if sel0 ~= nil and sel1 ~= nil and sel0 ~= sel1 then
+    vim.replace(sel0, sel1, out)
+  elseif has_args then
+    vim.send(out)
+  else
+    vim.replace(0, #vim.get_text(), out)
+  end
+  local short = out:gsub("\n", " ")
+  if #short > 80 then short = short:sub(1, 80) .. "…" end
+  vim.status(":tr → " .. short)
+end
+
 vim.register("tr", function(...)
-  local args = { ... }
   local visual, rest = false, {}
-  for _, a in ipairs(args) do
+  for _, a in ipairs({ ... }) do
     if a == "-v" or a == "--view" then
       visual = true
     else
@@ -96,7 +154,8 @@ vim.register("tr", function(...)
   end
 
   local text, sel0, sel1
-  if #rest > 0 then
+  local has_args = #rest > 0
+  if has_args then
     text = table.concat(rest, " ")
   else
     local all = vim.get_text()
@@ -107,60 +166,37 @@ vim.register("tr", function(...)
       text = all
     end
   end
-  text = (text or ""):gsub("[%s]+", " ")
+  -- Colapsa espaços múltiplos e tira as pontas: "   "/`" a  b "` viram ""/"a b".
+  text = (text or ""):gsub("[%s]+", " "):match("^%s*(.-)%s*$") or ""
   if text == "" then
     vim.status(":tr — texto vazio")
     return
   end
 
   local truncated = #text > MAX_CHARS
-  local original = text
   text = text:sub(1, MAX_CHARS)
 
-  local src, why, detected = identify(text)
-  if not src then
-    if why == "net" then
-      vim.status(":tr — sem resposta do trans (internet?)")
-    elseif why == "missing" then
-      vim.status(":tr — instale o translate-shell (pkg install translate-shell)")
-    else
-      src = heur_src(text) -- idioma exótico/ambiguo: segue pela heurística
+  identify(text, function(src, why)
+    if not src then
+      if why == "net" then
+        vim.status(":tr — sem resposta do trans (internet?)")
+        return
+      elseif why == "missing" then
+        vim.status(":tr — instale o translate-shell (pkg install translate-shell)")
+        return
+      end
+      src = heur_src(text) -- idioma exótico/ambíguo: segue pela heurística
     end
-  end
-  if not src then return end
-
-  local out = clean_trans(do_translate(text, src), text)
-  if not out then
-    -- Resultado improvável (idêntico/erro): tenta a direção contrária.
-    local alt = (src == "pt") and "en" or "pt"
-    out = clean_trans(do_translate(text, alt), text)
-  end
-  if not out then
-    vim.status(":tr — sem tradução")
-    return
-  end
-  if truncated then
-    out = out .. "\n(porção inicial traduzida)"
-  end
-
-  if visual then
-    if #out > 300 then vim.page(out) else vim.status(out) end
-    return
-  end
-
-  -- Devolve ao app: troca a seleção; arg sem seleção => insere no cursor;
-  -- texto completo => substitui tudo.
-  if sel0 ~= nil and sel1 ~= nil and sel0 ~= sel1 then
-    vim.replace(sel0, sel1, out)
-  elseif #rest > 0 then
-    vim.send(out)
-  else
-    vim.replace(0, #vim.get_text(), out)
-  end
-
-  local short = out:gsub("\n", " ")
-  if #short > 80 then short = short:sub(1, 80) .. "…" end
-  vim.status(":tr → " .. short)
+    if not src then return end
+    translate_for_real(text, src, function(out)
+      finish(out, truncated, visual, sel0, sel1, has_args)
+    end)
+  end)
 end)
 
-return {}
+return {
+  trans_cmd   = trans_cmd,   -- monta o comando bash garantindo o trans
+  heur_src    = heur_src,    -- direção heurística por palavras-pivô
+  clean_trans = clean_trans, -- limpa/valida a saída do trans
+  identify_out = identify_out, -- direção vinda da saída do -identify
+}

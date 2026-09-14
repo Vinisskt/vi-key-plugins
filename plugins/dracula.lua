@@ -45,17 +45,4 @@ vim.register("dracula", function(arg)
   vim.status("tema dracula ativo")
 end)
 
-vim.register("theme", function(arg)
-  if not arg or arg == "" then
-    vim.status("tema atual: " .. vim.current_theme())
-    return
-  end
-  if arg == "default" or arg == "gruvbox" then
-    vim.set_theme("")
-    vim.status("tema padrão (gruvbox)")
-  else
-    vim.set_theme(arg)
-  end
-end)
-
 return {}

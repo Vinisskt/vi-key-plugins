@@ -20,6 +20,13 @@ local WORKER_TOKEN = "vk-ipc-worker"
 
 local M = {}
 
+-- Gancho p/ testes: aponta DATA/VAR (diretórios de fila e worker) para pastas
+-- temporárias sem tocar no fluxo da ponte.
+function M.set_env(data_dir, var_dir)
+  if data_dir then DATA = data_dir end
+  if var_dir then VAR, FIFO = var_dir, var_dir .. "/fifo" end
+end
+
 local function read_file(path)
   local f = io.open(path, "r")
   if not f then return nil end
