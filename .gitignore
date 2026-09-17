@@ -2,3 +2,8 @@
 vk-ipcd
 *.apk
 plugins/dicionario/dados/
+__pycache__/
+*.bak*
+test/tmp/
+erro*.txt
+saida*.txt

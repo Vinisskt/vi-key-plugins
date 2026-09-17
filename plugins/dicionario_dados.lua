@@ -1,8 +1,8 @@
 -- dicionario_dados.lua — índice do :dict (GERADO). Não edite à mão.
 -- Fonte: lista de frequência do português (hermitdave/FrequencyWords
--- pt_50k.txt, MIT). Formato: 'chave\tcanonical\tfreq_plana\tfreq_acu'
--- por linha, ordenado pela chave (busca binária ao digitar).
--- Regenerate: lua5.1 scripts/gera_dicionario.lua <entrada> <out.dat> <saida.lua>
+-- pt_50k.txt, MIT) + variações acentuadas verificadas no corpus
+-- Wikipedia pt (scripts/acentua_regras.py). Formato: 'chave\tcanonical\t'
+-- 'freq_plana\tfreq_acu' por linha, ordenado pela chave (busca binária).
 return [===[
 a	a	5761742	447611
 aa	aa	374	0
@@ -219,6 +219,7 @@ abrande	abrande	162	0
 abrandem	abrandem	73	0
 abrandou	abrandou	116	0
 abrange	abrange	123	0
+abrangencia	abrangência	0	1
 abrangente	abrangente	178	0
 abras	abras	859	0
 abrasador	abrasador	72	0
@@ -279,6 +280,7 @@ absorver	absorver	642	0
 absorveu	absorveu	110	0
 absorvida	absorvida	106	0
 absorvido	absorvido	197	0
+abstencao	abstenção	0	1
 abstinencia	abstinência	0	399
 abstracta	abstracta	68	0
 abstracto	abstracto	130	0
@@ -362,6 +364,7 @@ academico	académico	0	367
 academicos	académicos	0	218
 academy	academy	95	0
 acafrao	açafrão	0	102
+acai	açaí	0	1
 acalma	acalma	507	0
 acalmado	acalmado	72	0
 acalmam	acalmam	57	0
@@ -478,6 +481,7 @@ acene	acene	88	0
 aceno	aceno	150	0
 acenou	acenou	104	0
 acento	acento	96	0
+acentuacao	acentuação	0	1
 acentuada	acentuada	57	0
 acer	ácer	0	127
 acerca	acerca	16629	126
@@ -795,6 +799,7 @@ actuou	actuou	157	0
 acucar	açúcar	0	4086
 acuda	acuda	147	0
 acudam	acudam	192	0
+acude	açude	0	1
 acumula	acumula	89	0
 acumulacao	acumulação	0	160
 acumulada	acumulada	99	0
@@ -867,6 +872,7 @@ adepta	adepta	61	0
 adepto	adepto	226	0
 adeptos	adeptos	273	0
 adequa	adequa	57	0
+adequacao	adequação	0	1
 adequada	adequada	1092	0
 adequadamente	adequadamente	326	0
 adequadas	adequadas	282	0
@@ -1365,6 +1371,7 @@ agitar	agitar	558	0
 agite	agite	58	0
 agitou	agitou	62	0
 agiu	agiu	857	0
+aglomeracao	aglomeração	0	1
 aglomerado	aglomerado	99	0
 agnes	agnes	750	0
 agnew	agnew	82	0
@@ -1418,6 +1425,8 @@ agredida	agredida	203	0
 agredido	agredido	312	0
 agredir	agredir	285	0
 agrediu	agrediu	409	0
+agregacao	agregação	0	1
+agremiacao	agremiação	0	1
 agressao	agressão	0	2310
 agressiva	agressiva	736	0
 agressivamente	agressivamente	109	0
@@ -1436,6 +1445,7 @@ agricultor	agricultor	862	0
 agricultores	agricultores	832	0
 agricultura	agricultura	696	0
 agridoce	agridoce	90	0
+agronegocio	agronegócio	0	1
 agrupamento	agrupamento	86	0
 agua	água	682	46062
 aguadeiro	aguadeiro	68	0
@@ -1802,6 +1812,7 @@ alexx	alexx	368	0
 alf	alf	1592	0
 alfa	alfa	2681	0
 alfabetica	alfabética	0	198
+alfabetizacao	alfabetização	0	1
 alfabeto	alfabeto	474	0
 alface	alface	461	0
 alfaces	alfaces	56	0
@@ -1976,6 +1987,7 @@ almond	almond	68	0
 almondega	almôndega	0	120
 almondegas	almôndegas	0	439
 alo	alô	260	3609
+alocacao	alocação	0	1
 aloha	aloha	335	0
 alojada	alojada	185	0
 alojado	alojado	175	0
@@ -2515,6 +2527,7 @@ anestesiar	anestesiar	74	0
 anestesico	anestésico	0	204
 anestesista	anestesista	156	0
 aneurisma	aneurisma	558	0
+anexacao	anexação	0	1
 anexado	anexado	73	0
 anexar	anexar	60	0
 anexo	anexo	374	0
@@ -3332,6 +3345,7 @@ apunhalado	apunhalado	305	0
 apunhalar	apunhalar	215	0
 apunhalei	apunhalei	58	0
 apunhalou	apunhalou	146	0
+apuracao	apuração	0	1
 apurada	apurada	57	0
 apurado	apurado	161	0
 apurados	apurados	89	0
@@ -4138,6 +4152,7 @@ assumisse	assumisse	69	0
 assumiste	assumiste	131	0
 assumiu	assumiu	905	0
 assumo	assumo	1345	0
+assuncao	assunção	0	1
 assunto	assunto	19441	0
 assuntos	assuntos	6497	0
 assusta	assusta	1755	0
@@ -4250,6 +4265,7 @@ atchim	atchim	60	0
 ate	até	1006	241975
 atear	atear	204	0
 ateia	ateia	70	0
+atelie	ateliê	0	1
 atelier	atelier	134	0
 atena	atena	180	0
 atenas	atenas	652	0
@@ -4715,6 +4731,7 @@ autografar	autografar	124	0
 autografo	autógrafo	73	942
 autografos	autógrafos	0	473
 autolicus	autólicus	0	80
+automacao	automação	0	1
 automatica	automática	0	769
 automaticamente	automaticamente	660	0
 automaticas	automáticas	0	374
@@ -5259,6 +5276,7 @@ barbados	barbados	202	0
 barbara	barbara	2198	577
 barbarela	barbarela	138	0
 barbaridade	barbaridade	107	0
+barbarie	barbárie	0	1
 barbaro	bárbaro	0	532
 barbaros	bárbaros	0	570
 barbarosa	barbarosa	75	0
@@ -5941,6 +5959,7 @@ bilhetes	bilhetes	5223	0
 bilhoes	bilhões	0	645
 biliao	bilião	0	538
 biliar	biliar	166	0
+bilingue	bilíngue	0	1
 bilioes	biliões	0	1723
 bilionario	bilionário	0	548
 bilionarios	bilionários	0	107
@@ -6432,6 +6451,7 @@ botar	botar	166	0
 botas	botas	3863	0
 bote	bote	733	0
 botes	botes	281	0
+boticario	boticário	0	1
 botija	botija	179	0
 botijas	botijas	79	0
 botoes	botões	0	1506
@@ -7550,7 +7570,9 @@ candidatos	candidatos	1153	0
 candidatou	candidatou	82	0
 candidatura	candidatura	837	0
 candidaturas	candidaturas	162	0
+candido	cândido	0	1
 candie	candie	70	0
+candomble	candomblé	0	1
 candy	candy	771	0
 candyman	candyman	145	0
 cane	cane	325	0
@@ -7589,7 +7611,7 @@ cannon	cannon	329	0
 cano	cano	1729	0
 canoa	canoa	396	0
 canoas	canoas	98	0
-canon	canon	57	0
+canon	cânon	6	10
 canos	canos	873	0
 cansa	cansa	306	0
 cansaco	cansaço	0	426
@@ -7679,8 +7701,10 @@ capachinho	capachinho	125	0
 capacho	capacho	126	0
 capacidade	capacidade	4563	0
 capacidades	capacidades	2085	0
+capacitacao	capacitação	0	1
 capanga	capanga	105	0
 capangas	capangas	319	0
+capao	capão	0	1
 capas	capas	446	0
 capataz	capataz	460	0
 capaz	capaz	23073	0
@@ -7727,6 +7751,7 @@ capricornio	capricórnio	0	113
 capsula	cápsula	0	1266
 capsulas	cápsulas	0	624
 capta	capta	142	0
+captacao	captação	0	1
 captado	captado	90	0
 captain	captain	168	0
 captam	captam	64	0
@@ -7769,6 +7794,7 @@ caracteres	caracteres	149	0
 caracteristica	característica	0	522
 caracteristicas	características	0	842
 caracteristico	característico	0	124
+caracterizacao	caracterização	0	108
 carago	carago	127	0
 caraibas	caraíbas	0	443
 carajo	carajo	141	0
@@ -8097,11 +8123,13 @@ casper	casper	340	0
 caspere	caspere	141	0
 caspian	caspian	83	0
 cass	cass	1126	0
+cassacao	cassação	0	1
 cassandra	cassandra	787	0
 cassavetes	cassavetes	56	0
 cassete	cassete	3132	0
 cassetes	cassetes	1248	0
 cassetete	cassetete	102	0
+cassia	cássia	0	1
 cassidy	cassidy	956	0
 cassie	cassie	1563	0
 cassino	cassino	283	0
@@ -8334,6 +8362,7 @@ cedinho	cedinho	90	0
 cedo	cedo	23555	81
 cedric	cedric	327	0
 cedro	cedro	91	0
+cedula	cédula	0	1
 cee	cee	102	0
 cega	cega	1710	0
 cegamente	cegamente	254	0
@@ -8525,6 +8554,7 @@ cesto	cesto	1647	0
 cestos	cestos	289	0
 cetamina	cetamina	81	0
 cetera	cetera	96	0
+cetico	cético	0	1
 cetim	cetim	199	0
 cetro	cetro	83	0
 ceu	céu	83	15324
@@ -8534,6 +8564,7 @@ ch	ch	181	0
 cha	chá	404	10875
 chacais	chacais	115	0
 chacal	chacal	181	0
+chacara	chácara	0	1
 chacha	chacha	112	0
 chacina	chacina	209	0
 chacinados	chacinados	117	0
@@ -9459,6 +9490,7 @@ coagulo	coágulo	0	435
 coagulos	coágulos	0	208
 coakley	coakley	59	0
 coala	coala	59	0
+coalizao	coalizão	0	1
 coast	coast	189	0
 coates	coates	109	0
 cob	cob	63	0
@@ -10317,6 +10349,7 @@ concedida	concedida	539	0
 concedido	concedido	575	0
 concedidos	concedidos	67	0
 concedo	concedo	105	0
+conceicao	conceição	0	1
 conceito	conceito	1735	0
 conceitos	conceitos	296	0
 concelho	concelho	638	0
@@ -10393,6 +10426,7 @@ concorde	concorde	352	0
 concordei	concordei	852	0
 concordem	concordem	86	0
 concordes	concordes	61	0
+concordia	concórdia	0	1
 concordo	concordo	7117	0
 concordou	concordou	1736	0
 concorre	concorre	68	0
@@ -10406,6 +10440,7 @@ concorrido	concorrido	56	0
 concreta	concreta	248	0
 concretamente	concretamente	157	0
 concretas	concretas	326	0
+concretizacao	concretização	0	1
 concretizado	concretizado	72	0
 concretizar	concretizar	370	0
 concretizou	concretizou	65	0
@@ -10493,6 +10528,7 @@ cones	cones	168	0
 conexao	conexão	0	724
 conexoes	conexões	0	205
 coney	coney	239	0
+confeccao	confecção	0	1
 confederacao	confederação	0	259
 confederado	confederado	110	0
 confederados	confederados	146	0
@@ -10761,6 +10797,7 @@ conquistei	conquistei	156	0
 conquistou	conquistou	398	0
 conrad	conrad	1947	0
 conroy	conroy	219	0
+consagracao	consagração	0	1
 consagrada	consagrada	59	0
 consagrado	consagrado	93	0
 consciencia	consciência	58	5667
@@ -10769,6 +10806,7 @@ consciencioso	consciencioso	56	0
 consciente	consciente	1730	0
 conscientemente	conscientemente	207	0
 conscientes	conscientes	326	0
+conscientizacao	conscientização	0	1
 consecutiva	consecutiva	63	0
 consecutivas	consecutivas	170	0
 consecutivo	consecutivo	93	0
@@ -10887,6 +10925,7 @@ consoante	consoante	175	0
 consola	consola	390	0
 consolacao	consolação	0	367
 consolar	consolar	246	0
+consolidacao	consolidação	0	1
 consolidar	consolidar	135	0
 consolidated	consolidated	89	0
 consolo	consolo	992	0
@@ -10914,6 +10953,7 @@ constantine	constantine	310	0
 constantino	constantino	229	0
 constantinopla	constantinopla	183	0
 constar	constar	242	0
+constatacao	constatação	0	1
 constatar	constatar	150	0
 constava	constava	93	0
 conste	conste	863	0
@@ -11165,6 +11205,7 @@ contrabandear	contrabandear	270	0
 contrabandista	contrabandista	293	0
 contrabandistas	contrabandistas	300	0
 contrabando	contrabando	1052	0
+contracao	contração	0	1
 contraccao	contracção	0	196
 contraccoes	contracções	0	351
 contraceptivos	contraceptivos	80	0
@@ -11578,6 +11619,7 @@ corredor	corredor	6729	0
 corredora	corredora	91	0
 corredores	corredores	1290	0
 corregedoria	corregedoria	60	0
+corrego	córrego	0	1
 correi	correi	56	0
 correia	correia	439	0
 correias	correias	176	0
@@ -12034,6 +12076,7 @@ criminal	criminal	2616	0
 criminalidade	criminalidade	260	0
 criminalista	criminalista	111	0
 criminalistas	criminalistas	60	0
+criminalizacao	criminalização	0	1
 criminalmente	criminalmente	89	0
 criminologia	criminologia	114	0
 criminosa	criminosa	1065	0
@@ -12872,6 +12915,7 @@ decoro	decoro	153	0
 decorou	decorou	108	0
 decorre	decorre	166	0
 decorrem	decorrem	138	0
+decorrencia	decorrência	0	1
 decorrer	decorrer	1053	0
 decorreu	decorreu	72	0
 decote	decote	257	0
@@ -13093,6 +13137,7 @@ dekker	dekker	152	0
 deko	deko	64	0
 del	del	1292	0
 dela	dela	105172	0
+delacao	delação	0	1
 delacroix	delacroix	160	0
 delancey	delancey	77	0
 delancy	delancy	61	0
@@ -13138,6 +13183,7 @@ deliciosas	deliciosas	348	0
 delicioso	delicioso	3043	0
 deliciosos	deliciosos	569	0
 delilah	delilah	297	0
+delimitacao	delimitação	0	1
 delinda	delinda	547	0
 deline	deline	372	0
 delineador	delineador	57	0
@@ -13169,6 +13215,7 @@ dem	dêm	99	120
 demais	demais	29370	0
 demanda	demanda	455	0
 demandas	demandas	65	0
+demarcacao	demarcação	0	1
 demarco	demarco	170	0
 demasia	demasia	287	0
 demasiada	demasiada	1432	0
@@ -13206,7 +13253,9 @@ democratica	democrática	0	253
 democraticamente	democraticamente	67	0
 democratico	democrático	0	272
 democraticos	democráticos	0	59
+democratizacao	democratização	0	1
 democrito	demócrito	0	63
+demografico	demográfico	0	1
 demolicao	demolição	0	397
 demolicoes	demolições	0	147
 demolida	demolida	76	0
@@ -13268,6 +13317,7 @@ denning	denning	98	0
 dennis	dennis	2909	0
 dennison	dennison	75	0
 denny	denny	1512	0
+denominacao	denominação	0	1
 denominado	denominado	90	0
 denominador	denominador	121	0
 denovo	denovo	61	0
@@ -13347,6 +13397,7 @@ deportado	deportado	196	0
 deportados	deportados	136	0
 deportar	deportar	89	0
 depos	depôs	0	63
+deposicao	deposição	0	1
 deposita	deposita	113	0
 depositado	depositado	165	0
 depositados	depositados	96	0
@@ -14711,6 +14762,7 @@ dickinson	dickinson	282	0
 dickson	dickson	110	0
 dicky	dicky	66	0
 did	did	163	0
+didatico	didático	0	1
 diddy	diddy	94	0
 didi	didi	342	0
 didier	didier	113	0
@@ -14734,6 +14786,7 @@ diferem	diferem	56	0
 diferenca	diferença	107	13016
 diferencas	diferenças	0	1281
 diferencia	diferencia	118	0
+diferenciacao	diferenciação	0	1
 diferencial	diferencial	176	0
 diferenciar	diferenciar	186	0
 diferente	diferente	27760	0
@@ -14922,6 +14975,7 @@ diretor	diretor	1808	0
 diretora	diretora	330	0
 diretores	diretores	144	0
 diretoria	diretoria	91	0
+diretorio	diretório	0	1
 diretos	diretos	142	0
 diria	diria	14089	0
 diriam	diriam	636	0
@@ -15117,6 +15171,7 @@ disse	disse	230305	0
 dissecacao	dissecação	0	119
 dissecar	dissecar	175	0
 disseccao	dissecção	0	72
+disseminacao	disseminação	0	1
 disseminar	disseminar	63	0
 dissemos	dissemos	2237	0
 disser	disser	7352	0
@@ -15970,6 +16025,7 @@ echidna	echidna	88	0
 echo	echo	675	0
 eckhart	eckhart	76	0
 ecklie	ecklie	120	0
+eclesiastico	eclesiástico	0	1
 eclipse	eclipse	574	0
 eclodir	eclodir	62	0
 eco	eco	803	0
@@ -16012,6 +16068,7 @@ edi	edi	106	0
 edicao	edição	0	1679
 edicoes	edições	0	192
 edie	edie	999	0
+edificacao	edificação	0	1
 edificio	edifício	392	9255
 edificios	edifícios	59	1627
 edimburgo	edimburgo	239	0
@@ -16136,6 +16193,7 @@ ejectar	ejectar	123	0
 eko	eko	98	0
 el	el	3946	0
 ela	ela	574225	0
+elaboracao	elaboração	0	1
 elaborada	elaborada	209	0
 elaboradas	elaboradas	71	0
 elaborado	elaborado	336	0
@@ -16413,6 +16471,7 @@ emergente	emergente	79	0
 emergentes	emergentes	63	0
 emergir	emergir	399	0
 emergiu	emergiu	166	0
+emerito	emérito	0	1
 emerson	emerson	592	0
 emery	emery	485	0
 emi	emi	111	0
@@ -16501,6 +16560,7 @@ empilhar	empilhar	133	0
 empinado	empinado	89	0
 empire	empire	763	0
 empoeirado	empoeirado	69	0
+empolgacao	empolgação	0	1
 empolgada	empolgada	259	0
 empolgado	empolgado	338	0
 empolgados	empolgados	99	0
@@ -17529,6 +17589,7 @@ erra	erra	167	0
 errada	errada	10492	0
 erradamente	erradamente	204	0
 erradas	erradas	2160	0
+erradicacao	erradicação	0	1
 erradicar	erradicar	195	0
 errado	errado	30455	0
 errados	errados	1843	0
@@ -17573,6 +17634,7 @@ escadarias	escadarias	74	0
 escadas	escadas	5388	0
 escadote	escadote	180	0
 escala	escala	2567	0
+escalacao	escalação	0	1
 escalada	escalada	494	0
 escalade	escalade	171	0
 escalante	escalante	149	0
@@ -18035,6 +18097,7 @@ especiarias	especiarias	377	0
 especie	espécie	134	12910
 especies	espécies	0	1790
 especifica	específica	133	1078
+especificacao	especificação	0	1
 especificacoes	especificações	0	392
 especificamente	especificamente	1605	0
 especificar	especificar	92	0
@@ -18190,7 +18253,7 @@ espontaneamente	espontaneamente	177	0
 espontaneidade	espontaneidade	109	0
 espontaneo	espontâneo	0	328
 espontaneos	espontâneos	0	74
-esporadico	esporadico	94	0
+esporadico	esporádico	0	3
 esporas	esporas	137	0
 esporos	esporos	274	0
 esporra	esporra	58	0
@@ -18315,6 +18378,7 @@ estabelecimento	estabelecimento	876	0
 estabelecimentos	estabelecimentos	101	0
 estabilidade	estabilidade	673	0
 estabiliza	estabiliza	73	0
+estabilizacao	estabilização	0	1
 estabilizada	estabilizada	109	0
 estabilizado	estabilizado	148	0
 estabilizador	estabilizador	129	0
@@ -18472,6 +18536,7 @@ esteroides	esteróides	81	791
 estes	estes	51524	0
 estetica	estética	0	208
 esteticista	esteticista	75	0
+estetico	estético	0	1
 estetoscopio	estetoscópio	0	154
 esteva	esteva	66	0
 estevao	estêvão	0	132
@@ -18800,7 +18865,9 @@ evan	evan	2503	0
 evander	evander	116	0
 evangelho	evangelho	369	0
 evangelhos	evangelhos	116	0
+evangelico	evangélico	0	1
 evangeline	evangeline	78	0
+evangelizacao	evangelização	0	1
 evans	evans	1472	0
 evapora	evapora	67	0
 evaporado	evaporado	55	0
@@ -18932,6 +18999,7 @@ examinou	examinou	282	0
 exata	exata	244	0
 exatamente	exatamente	6998	0
 exatas	exatas	75	0
+exatidao	exatidão	0	1
 exato	exato	1369	0
 exausta	exausta	958	0
 exaustao	exaustão	0	331
@@ -19103,6 +19171,7 @@ exitos	êxitos	0	315
 exley	exley	98	0
 exodo	êxodo	0	172
 exodus	exodus	81	0
+exoneracao	exoneração	0	1
 exonerado	exonerado	99	0
 exorbitante	exorbitante	70	0
 exorcismo	exorcismo	593	0
@@ -19451,6 +19520,7 @@ faith	faith	685	0
 faixa	faixa	1308	0
 faixas	faixas	412	0
 fala	fala	41706	0
+falacia	falácia	0	1
 falada	falada	100	0
 falado	falado	4288	0
 falador	falador	329	0
@@ -19903,7 +19973,7 @@ fel	fel	63	0
 felder	felder	60	0
 feldman	feldman	202	0
 felice	felice	126	0
-felicia	felicia	473	0
+felicia	felícia	2	4
 felicidade	felicidade	5396	0
 felicidades	felicidades	945	0
 felicitacoes	felicitações	0	253
@@ -20254,6 +20324,7 @@ finale	finale	200	0
 finalidade	finalidade	394	0
 finalista	finalista	423	0
 finalistas	finalistas	1339	0
+finalizacao	finalização	0	1
 finalizado	finalizado	73	0
 finalizar	finalizar	295	0
 finalmente	finalmente	21776	0
@@ -20732,6 +20803,7 @@ formosa	formosa	414	0
 formoso	formoso	210	0
 formou	formou	464	0
 formula	fórmula	162	1510
+formulacao	formulação	0	1
 formular	formular	120	0
 formulario	formulário	0	1074
 formularios	formulários	0	608
@@ -21634,6 +21706,7 @@ gatos	gatos	3334	0
 gatsby	gatsby	231	0
 gatuno	gatuno	104	0
 gauche	gauche	59	0
+gauchos	gaúchos	0	1
 gauguin	gauguin	79	0
 gaules	gaulês	0	163
 gauleses	gauleses	251	0
@@ -21644,6 +21717,7 @@ gauss	gauss	145	0
 gautam	gautam	132	0
 gauthier	gauthier	57	0
 gav	gav	66	0
+gavea	gávea	0	1
 gaveston	gaveston	72	0
 gaveta	gaveta	1830	0
 gavetas	gavetas	415	0
@@ -21722,6 +21796,7 @@ genealogica	genealógica	0	177
 genebra	genebra	654	0
 generais	generais	732	0
 general	general	17065	0
+generalizacao	generalização	0	1
 generalizada	generalizada	123	0
 generalizado	generalizado	74	0
 generico	genérico	0	158
@@ -21832,7 +21907,7 @@ gerem	gerem	98	0
 gerencia	gerência	0	436
 gerente	gerente	3979	0
 gerentes	gerentes	172	0
-geres	geres	67	0
+geres	gerês	0	6
 gerhard	gerhard	59	0
 gerhardt	gerhardt	284	0
 geri	geri	65	0
@@ -22238,6 +22313,7 @@ governados	governados	78	0
 governam	governam	133	0
 governamentais	governamentais	408	0
 governamental	governamental	515	0
+governanca	governança	0	1
 governanta	governanta	540	0
 governante	governante	327	0
 governantes	governantes	221	0
@@ -22586,6 +22662,7 @@ guangzhou	guangzhou	57	0
 guano	guano	68	0
 guantanamo	guantánamo	123	188
 guapo	guapo	116	0
+guarana	guaraná	0	1
 guarda	guarda	15358	0
 guardada	guardada	432	0
 guardadas	guardadas	277	0
@@ -22898,7 +22975,7 @@ hannah	hannah	3243	0
 hannibal	hannibal	795	0
 hannigan	hannigan	138	0
 hanoi	hanói	0	73
-hanover	hanover	201	0
+hanover	hanôver	3	16
 hans	hans	1452	0
 hansel	hansel	227	0
 hansen	hansen	456	0
@@ -23362,7 +23439,7 @@ hipoteses	hipóteses	95	6517
 hipotetica	hipotética	0	128
 hipoteticamente	hipoteticamente	424	0
 hipotetico	hipotético	0	156
-hipoxia	hipoxia	64	0
+hipoxia	hipóxia	1	3
 hippie	hippie	550	0
 hippies	hippies	377	0
 hippo	hippo	65	0
@@ -23496,6 +23573,7 @@ homicidios	homicídios	157	3785
 homie	homie	529	0
 homo	homo	414	0
 homofobico	homofóbico	0	125
+homonimo	homônimo	0	1
 homosexuais	homosexuais	61	0
 homosexual	homosexual	124	0
 homossexuais	homossexuais	771	0
@@ -23573,6 +23651,7 @@ hormona	hormona	98	0
 hormonais	hormonais	88	0
 hormonal	hormonal	177	0
 hormonas	hormonas	832	0
+hormonio	hormônio	0	1
 hormonios	hormônios	0	136
 horn	horn	403	0
 horne	horne	169	0
@@ -23733,6 +23812,7 @@ humor	humor	5035	0
 humorada	humorada	57	0
 humorado	humorado	127	0
 humores	humores	88	0
+humoristico	humorístico	0	1
 humphrey	humphrey	961	0
 humphreys	humphreys	80	0
 humphries	humphries	73	0
@@ -23795,7 +23875,7 @@ iaque	iaque	117	0
 ias	ias	11973	108
 iate	iate	1035	0
 iates	iates	136	0
-ibis	ibis	59	0
+ibis	íbis	0	5
 ibiza	ibiza	140	0
 ibm	ibm	241	0
 ibn	ibn	88	0
@@ -23916,6 +23996,7 @@ ignorou	ignorou	315	0
 igor	igor	541	0
 igreja	igreja	13124	0
 igrejas	igrejas	685	0
+iguacu	iguaçu	0	1
 iguais	iguais	5189	0
 igual	igual	10316	0
 iguala	iguala	70	0
@@ -24135,6 +24216,7 @@ imperadores	imperadores	172	0
 imperativo	imperativo	326	0
 imperatriz	imperatriz	573	0
 imperceptivel	imperceptível	0	103
+imperdivel	imperdível	0	1
 imperdoaveis	imperdoáveis	0	70
 imperdoavel	imperdoável	0	414
 imperfeicao	imperfeição	0	92
@@ -24516,6 +24598,7 @@ incontrolavel	incontrolável	0	323
 inconveniencia	inconveniência	0	143
 inconveniente	inconveniente	902	0
 inconvenientes	inconvenientes	141	0
+incorporacao	incorporação	0	1
 incorporada	incorporada	60	0
 incorporado	incorporado	104	0
 incorporar	incorporar	99	0
@@ -24563,6 +24646,7 @@ indelicadeza	indelicadeza	78	0
 indelicado	indelicado	407	0
 indemnizacao	indemnização	0	439
 indemnizacoes	indemnizações	0	97
+indenizacao	indenização	0	1
 independence	independence	90	0
 independencia	independência	0	1121
 independente	independente	1886	0
@@ -24673,6 +24757,7 @@ indumentaria	indumentária	0	85
 industria	indústria	219	2304
 industriais	industriais	319	0
 industrial	industrial	1195	0
+industrializacao	industrialização	0	1
 industrias	indústrias	73	832
 industries	industries	267	0
 induz	induz	76	0
@@ -25098,6 +25183,7 @@ instantaneos	instantâneos	0	62
 instante	instante	6597	0
 instantes	instantes	961	0
 instantinho	instantinho	111	0
+instauracao	instauração	0	1
 instaveis	instáveis	0	280
 instavel	instável	0	1575
 instigador	instigador	57	0
@@ -25195,6 +25281,7 @@ intensa	intensa	965	0
 intensamente	intensamente	340	0
 intensas	intensas	213	0
 intensidade	intensidade	662	0
+intensificacao	intensificação	0	1
 intensificar	intensificar	107	0
 intensiva	intensiva	108	0
 intensivo	intensivo	166	0
@@ -25280,8 +25367,10 @@ interminavel	interminável	0	502
 intermitente	intermitente	127	0
 intermitentes	intermitentes	56	0
 interna	interna	2377	0
+internacao	internação	0	1
 internacionais	internacionais	1035	0
 internacional	internacional	3216	0
+internacionalizacao	internacionalização	0	1
 internacionalmente	internacionalmente	111	0
 internada	internada	312	0
 internado	internado	482	0
@@ -26426,6 +26515,7 @@ juridico	jurídico	0	382
 juridicos	jurídicos	0	90
 juris	júris	0	132
 jurisdicao	jurisdição	0	1249
+jurisprudencia	jurisprudência	0	1
 juro	juro	15548	0
 juros	juros	1013	0
 jurou	jurou	772	0
@@ -26478,7 +26568,7 @@ kaitlyn	kaitlyn	67	0
 kaja	kaja	84	0
 kajal	kajal	170	0
 kaji	kaji	65	0
-kaka	kaka	97	0
+kaka	kaká	0	3
 kakarotto	kakarotto	134	0
 kal	kal	129	0
 kala	kala	70	0
@@ -26531,7 +26621,7 @@ karadzic	karadzic	81	0
 karak	karak	61	0
 karakurt	karakurt	60	0
 karan	karan	531	0
-karaoke	karaoke	533	0
+karaoke	karaokê	2	7
 karate	karaté	275	613
 kardashian	kardashian	82	0
 kareem	kareem	123	0
@@ -27092,6 +27182,7 @@ lampada	lâmpada	0	1361
 lampadas	lâmpadas	0	599
 lamparina	lamparina	67	0
 lampert	lampert	76	0
+lampiao	lampião	0	1
 lamuriar	lamuriar	57	0
 lamurias	lamúrias	0	189
 lan	lan	359	0
@@ -27555,7 +27646,7 @@ leonard	leonard	3084	0
 leonardo	leonardo	797	0
 leone	leone	215	0
 leonid	leonid	84	0
-leonidas	leonidas	68	0
+leonidas	leônidas	1	12
 leonie	leonie	87	0
 leonor	leonor	135	0
 leontes	leontes	70	0
@@ -27601,7 +27692,7 @@ lestrade	lestrade	171	0
 let	let	521	0
 letais	letais	328	0
 letal	letal	1136	0
-leticia	leticia	73	0
+leticia	letícia	1	18
 letitia	letitia	158	0
 leto	leto	134	0
 letonia	letónia	0	61
@@ -27763,6 +27854,7 @@ libertarei	libertarei	65	0
 libertarem	libertarem	189	0
 libertares	libertares	175	0
 libertaria	libertaria	62	0
+libertario	libertário	0	1
 libertarmos	libertarmos	139	0
 libertas	libertas	94	0
 libertasse	libertasse	94	0
@@ -27832,7 +27924,7 @@ liderei	liderei	64	0
 lideres	líderes	213	2253
 lidero	lidero	94	0
 liderou	liderou	249	0
-lidia	lidia	63	0
+lidia	lídia	1	14
 lido	lido	2292	0
 lidocaina	lidocaína	0	275
 lidos	lidos	94	0
@@ -28010,6 +28102,7 @@ linguica	linguiça	0	99
 linguini	linguini	55	0
 linguista	linguista	66	0
 linguistica	linguística	0	95
+linguistico	linguístico	0	1
 linha	linha	19679	0
 linhagem	linhagem	884	0
 linhagens	linhagens	65	0
@@ -28093,7 +28186,7 @@ liv	liv	1365	0
 live	live	293	0
 liverpool	liverpool	437	0
 lives	lives	109	0
-livia	livia	105	0
+livia	lívia	2	12
 lividez	lividez	151	0
 living	living	105	0
 livingston	livingston	159	0
@@ -28128,6 +28221,7 @@ lixados	lixados	1123	0
 lixam	lixam	99	0
 lixamos	lixámos	0	56
 lixando	lixando	102	0
+lixao	lixão	0	1
 lixar	lixar	7067	0
 lixaram	lixaram	122	0
 lixares	lixares	96	0
@@ -28177,6 +28271,7 @@ lobulo	lóbulo	0	229
 lobulos	lóbulos	0	86
 loc	loc	57	0
 loca	loca	69	0
+locacao	locação	0	1
 locais	locais	5621	0
 local	local	26862	0
 localidade	localidade	88	0
@@ -28210,6 +28305,7 @@ lockhart	lockhart	452	0
 locksley	locksley	189	0
 lockwood	lockwood	461	0
 loco	loco	227	0
+locomocao	locomoção	0	1
 locomotiva	locomotiva	284	0
 locos	locos	61	0
 locutor	locutor	114	0
@@ -28228,6 +28324,7 @@ logico	lógico	0	1065
 logicos	lógicos	0	67
 login	login	93	0
 logistica	logística	0	262
+logistico	logístico	0	1
 logo	logo	40105	0
 logotipo	logótipo	156	266
 logro	logro	100	0
@@ -28729,6 +28826,7 @@ magicar	magicar	62	0
 magicas	mágicas	0	632
 magico	mágico	65	3797
 magicos	mágicos	0	1011
+magisterio	magistério	0	1
 magistrado	magistrado	525	0
 magistrados	magistrados	64	0
 magma	magma	142	0
@@ -28897,6 +28995,7 @@ malfeitores	malfeitores	106	0
 malformacao	malformação	0	62
 malfoy	malfoy	100	0
 malha	malha	385	0
+malhacao	malhação	0	1
 malhado	malhado	93	0
 malhar	malhar	126	0
 malhas	malhas	66	0
@@ -28959,6 +29058,7 @@ mamadas	mamadas	75	0
 mamae	mamãe	133	4475
 mamalhuda	mamalhuda	81	0
 maman	maman	62	0
+mamao	mamão	0	1
 mamar	mamar	365	0
 mamas	mamas	4233	173
 mamba	mamba	65	0
@@ -29222,6 +29322,7 @@ maquinas	máquinas	84	4081
 maquinista	maquinista	250	0
 mar	mar	12639	0
 mara	mara	600	0
+maracuja	maracujá	0	1
 marada	marada	365	0
 maradas	maradas	188	0
 marado	marado	694	0
@@ -29872,7 +29973,7 @@ medicamentos	medicamentos	4189	0
 medicao	medição	0	119
 medicar	medicar	69	0
 medicas	médicas	0	976
-medici	medici	203	0
+medici	médici	7	17
 medicina	medicina	4431	0
 medicinais	medicinais	188	0
 medicinal	medicinal	296	0
@@ -29937,7 +30038,7 @@ mehta	mehta	56	0
 mei	mei	675	0
 meia	meia	12242	0
 meias	meias	3062	0
-meier	meier	85	0
+meier	méier	5	6
 meiga	meiga	307	0
 meigo	meigo	521	0
 meigos	meigos	61	0
@@ -30069,6 +30170,7 @@ mensagem	mensagem	21716	0
 mensagens	mensagens	5558	0
 mensais	mensais	167	0
 mensal	mensal	303	0
+mensalao	mensalão	0	1
 mensalidade	mensalidade	96	0
 mensalmente	mensalmente	66	0
 menstruacao	menstruação	0	210
@@ -30187,7 +30289,7 @@ mergulhei	mergulhei	110	0
 mergulho	mergulho	1821	0
 mergulhos	mergulhos	98	0
 mergulhou	mergulhou	216	0
-merida	merida	62	0
+merida	mérida	3	14
 meridian	meridian	71	0
 meritissima	meritíssima	0	833
 meritissimo	meritíssimo	0	2907
@@ -30501,6 +30603,7 @@ milionaria	milionária	0	114
 milionario	milionário	0	871
 milionarios	milionários	0	329
 milionesima	milionésima	0	64
+militancia	militância	0	1
 militante	militante	146	0
 militantes	militantes	168	0
 militar	militar	7177	0
@@ -30585,6 +30688,7 @@ minimizar	minimizar	315	0
 minimo	mínimo	193	5029
 minimos	mínimos	0	237
 minion	minion	64	0
+minisserie	minissérie	0	1
 ministerio	ministério	0	2298
 ministra	ministra	211	0
 ministro	ministro	4209	0
@@ -30811,6 +30915,7 @@ moderados	moderados	101	0
 modern	modern	147	0
 moderna	moderna	1724	0
 modernas	modernas	364	0
+modernizacao	modernização	0	1
 modernizar	modernizar	57	0
 moderno	moderno	1252	0
 modernos	modernos	609	0
@@ -31313,6 +31418,7 @@ mouche	mouche	67	0
 moulin	moulin	79	0
 mount	mount	411	0
 mountain	mountain	698	0
+mourao	mourão	0	1
 mouro	mouro	161	0
 mouros	mouros	100	0
 mouse	mouse	303	0
@@ -31473,6 +31579,7 @@ multibanco	multibanco	561	0
 multidao	multidão	0	3290
 multidoes	multidões	0	509
 multimedia	multimédia	56	102
+multimidia	multimídia	0	1
 multimilionaria	multimilionária	0	59
 multimilionario	multimilionário	0	188
 multinacionais	multinacionais	112	0
@@ -31585,6 +31692,7 @@ mutilados	mutilados	145	0
 mutilar	mutilar	132	0
 mutilou	mutilou	58	0
 mutiny	mutiny	98	0
+mutirao	mutirão	0	1
 muto	muto	94	0
 mutt	mutt	89	0
 mutua	mútua	0	321
@@ -31996,7 +32104,7 @@ nem	nem	178338	0
 nemesis	némesis	102	122
 nemo	nemo	457	0
 nena	nena	99	0
-nene	nene	95	0
+nene	nenê	2	18
 nenem	neném	0	138
 nenhum	nenhum	62093	0
 nenhuma	nenhuma	38316	0
@@ -32371,6 +32479,7 @@ nostra	nostra	76	0
 nostradamus	nostradamus	242	0
 not	not	449	0
 nota	nota	5725	0
+notacao	notação	0	1
 notada	notada	104	0
 notado	notado	897	0
 notam	notam	144	0
@@ -33000,7 +33109,7 @@ olympia	olympia	163	0
 olympic	olympic	91	0
 olympus	olympus	110	0
 om	om	329	0
-oma	oma	84	0
+oma	omã	5	12
 omaha	omaha	375	0
 omar	omar	1830	0
 ombro	ombro	3666	0
@@ -33180,6 +33289,7 @@ ordell	ordell	65	0
 ordem	ordem	19221	0
 orden	orden	113	0
 ordena	ordena	438	0
+ordenacao	ordenação	0	1
 ordenada	ordenada	156	0
 ordenado	ordenado	1545	0
 ordenados	ordenados	225	0
@@ -33370,6 +33480,7 @@ otima	ótima	0	2028
 otimas	ótimas	0	314
 otimismo	otimismo	60	0
 otimista	otimista	176	0
+otimizacao	otimização	0	1
 otimo	ótimo	86	10334
 otimos	ótimos	0	300
 otis	otis	1030	0
@@ -33479,6 +33590,7 @@ ox	ox	180	0
 oxala	oxalá	0	2039
 oxford	oxford	839	0
 oxicodona	oxicodona	187	0
+oxidacao	oxidação	0	1
 oxido	óxido	0	249
 oxigenacao	oxigenação	0	82
 oxigenada	oxigenada	87	0
@@ -33544,6 +33656,7 @@ padrinho	padrinho	2174	0
 padrinhos	padrinhos	171	0
 padroeiro	padroeiro	112	0
 padroes	padrões	0	2122
+padronizacao	padronização	0	1
 paella	paella	85	0
 paes	pães	0	278
 paezinhos	pãezinhos	0	173
@@ -33823,6 +33936,7 @@ paralelas	paralelas	145	0
 paralelo	paralelo	569	0
 paralelos	paralelos	205	0
 paralisa	paralisa	77	0
+paralisacao	paralisação	0	1
 paralisada	paralisada	233	0
 paralisado	paralisado	544	0
 paralisados	paralisados	76	0
@@ -33837,6 +33951,7 @@ param	param	1238	0
 paramedica	paramédica	0	109
 paramedico	paramédico	0	511
 paramedicos	paramédicos	0	1284
+parametro	parâmetro	0	1
 parametros	parâmetros	0	469
 paramilitar	paramilitar	74	0
 paramilitares	paramilitares	68	0
@@ -34354,6 +34469,7 @@ pedacinho	pedacinho	285	0
 pedacinhos	pedacinhos	352	0
 pedaco	pedaço	0	6744
 pedacos	pedaços	0	3803
+pedagio	pedágio	0	1
 pedais	pedais	161	0
 pedal	pedal	245	0
 pedalar	pedalar	178	0
@@ -34502,7 +34618,7 @@ pena	pena	34281	169
 penal	penal	458	0
 penalidade	penalidade	111	0
 penalizacao	penalização	0	88
-penalti	penalti	89	0
+penalti	pênalti	1	33
 penalty	penalty	64	0
 penas	penas	1524	0
 pence	pence	207	0
@@ -34553,6 +34669,7 @@ peninsula	península	0	263
 penis	pénis	73	3462
 penitencia	penitência	0	361
 penitenciaria	penitenciária	0	553
+penitenciario	penitenciário	0	1
 penn	penn	428	0
 pennington	pennington	151	0
 pennsylvania	pennsylvania	207	0
@@ -35629,6 +35746,7 @@ plebeu	plebeu	86	0
 plebeus	plebeus	121	0
 plena	plena	1124	0
 plenamente	plenamente	623	0
+plenario	plenário	0	1
 plenitude	plenitude	91	0
 pleno	pleno	795	0
 plenos	plenos	110	0
@@ -35745,6 +35863,7 @@ polacos	polacos	417	0
 polar	polar	520	0
 polares	polares	303	0
 polaridade	polaridade	92	0
+polarizacao	polarização	0	1
 polaroid	polaroid	61	0
 pole	pole	118	0
 polegada	polegada	270	0
@@ -35753,6 +35872,7 @@ polegar	polegar	1037	0
 polegares	polegares	428	0
 poleiro	poleiro	103	0
 polemica	polémica	0	92
+polemico	polêmico	0	1
 polen	pólen	0	463
 poli	poli	74	0
 police	police	78	0
@@ -35860,6 +35980,7 @@ pontiaguda	pontiaguda	60	0
 pontiagudas	pontiagudas	65	0
 pontiagudo	pontiagudo	118	0
 pontiagudos	pontiagudos	78	0
+pontifice	pontífice	0	1
 pontinho	pontinho	74	0
 pontinhos	pontinhos	61	0
 ponto	ponto	24173	0
@@ -35900,6 +36021,7 @@ populacoes	populações	0	180
 popular	popular	3755	0
 populares	populares	734	0
 popularidade	popularidade	498	0
+popularizacao	popularização	0	1
 poque	poque	118	0
 poquer	póquer	0	1570
 por	por	1131581	24231
@@ -36193,6 +36315,7 @@ prazo	prazo	3234	0
 prazos	prazos	248	0
 pre	pré	173	212
 precaria	precária	0	112
+precario	precário	0	1
 precaucao	precaução	0	1262
 precaucoes	precauções	0	704
 prece	prece	256	0
@@ -36292,6 +36415,7 @@ preenchido	preenchido	318	0
 preenchidos	preenchidos	96	0
 preencho	preencho	74	0
 preeti	preeti	132	0
+prefacio	prefácio	0	1
 prefeito	prefeito	984	0
 prefeitura	prefeitura	220	0
 prefere	prefere	2506	0
@@ -36326,6 +36450,7 @@ prefiras	prefiras	136	0
 prefiro	prefiro	9203	0
 prefixo	prefixo	69	0
 prega	prega	234	0
+pregacao	pregação	0	1
 pregada	pregada	56	0
 pregado	pregado	171	0
 pregador	pregador	443	0
@@ -36368,6 +36493,7 @@ prematuro	prematuro	404	0
 prematuros	prematuros	57	0
 premeditacao	premeditação	0	112
 premeditado	premeditado	339	0
+premiacao	premiação	0	1
 premiada	premiada	79	0
 premiado	premiado	220	0
 premiar	premiar	59	0
@@ -36938,11 +37064,13 @@ projectou	projectou	127	0
 projetada	projetada	56	0
 projetado	projetado	79	0
 projetar	projetar	65	0
+projetil	projétil	0	1
 projeto	projeto	1588	0
 projetos	projetos	266	0
 prol	prol	179	0
 prole	prole	218	0
 proletariado	proletariado	105	0
+proliferacao	proliferação	0	99
 prologo	prólogo	0	74
 prolonga	prolonga	70	0
 prolongada	prolongada	256	0
@@ -37572,7 +37700,7 @@ quarto	quarto	49474	0
 quartos	quartos	5126	0
 quartzo	quartzo	151	0
 quase	quase	57365	0
-quasimodo	quasimodo	89	0
+quasimodo	quasímodo	0	6
 quatermain	quatermain	144	0
 quatorze	quatorze	143	0
 quatro	quatro	36889	0
@@ -37882,6 +38010,7 @@ radioactividade	radioactividade	165	0
 radioactivo	radioactivo	335	0
 radioactivos	radioactivos	97	0
 radioativo	radioativo	62	0
+radiodifusao	radiodifusão	0	1
 radiografia	radiografia	312	0
 radiografias	radiografias	316	0
 radiohead	radiohead	71	0
@@ -37974,7 +38103,7 @@ ralphkings	ralphkings	56	0
 ralston	ralston	57	0
 ram	ram	439	0
 rama	rama	243	0
-ramada	ramada	60	0
+ramada	ramadã	3	3
 rambaldi	rambaldi	389	0
 rambo	rambo	390	0
 rameira	rameira	500	0
@@ -38174,6 +38303,7 @@ ratazanas	ratazanas	665	0
 ratchett	ratchett	69	0
 rath	rath	134	0
 rather	rather	77	0
+ratificacao	ratificação	0	1
 ratinha	ratinha	180	0
 ratinho	ratinho	281	0
 ratinhos	ratinhos	106	0
@@ -38843,6 +38973,7 @@ regar	regar	253	0
 regata	regata	103	0
 regatear	regatear	148	0
 rege	rege	68	0
+regencia	regência	0	1
 regeneracao	regeneração	0	208
 regenerar	regenerar	131	0
 regent	regent	71	0
@@ -38930,6 +39061,7 @@ regulamentos	regulamentos	560	0
 regular	regular	975	0
 regulares	regulares	428	0
 regularidade	regularidade	155	0
+regularizacao	regularização	0	1
 regularmente	regularmente	798	0
 rehan	rehan	88	0
 rei	rei	27108	0
@@ -39271,6 +39403,7 @@ reportorio	reportório	0	58
 reportou	reportou	253	0
 reposicao	reposição	0	119
 reposicionar	reposicionar	59	0
+repositorio	repositório	0	1
 reposta	reposta	90	0
 repousa	repousa	162	0
 repousar	repousar	356	0
@@ -39326,6 +39459,7 @@ republicana	republicana	195	0
 republicano	republicano	594	0
 republicanos	republicanos	691	0
 republicas	repúblicas	0	90
+repudio	repúdio	0	1
 repugnancia	repugnância	0	62
 repugnante	repugnante	963	0
 repugnantes	repugnantes	153	0
@@ -39397,6 +39531,7 @@ residual	residual	168	0
 residuo	resíduo	0	377
 residuos	resíduos	0	1196
 resignacao	resignação	0	77
+resiliencia	resiliência	0	1
 resina	resina	265	0
 resinc	resinc	107	0
 resista	resista	244	0
@@ -39536,6 +39671,7 @@ respondo	respondo	828	0
 responsabilidade	responsabilidade	6815	0
 responsabilidades	responsabilidades	1708	0
 responsabiliza	responsabiliza	67	0
+responsabilizacao	responsabilização	0	1
 responsabilizada	responsabilizada	65	0
 responsabilizado	responsabilizado	228	0
 responsabilizados	responsabilizados	87	0
@@ -40151,6 +40287,7 @@ roderick	roderick	242	0
 rodgers	rodgers	146	0
 rodin	rodin	154	0
 rodinhas	rodinhas	152	0
+rodizio	rodízio	0	1
 rodman	rodman	85	0
 rodney	rodney	1516	0
 rodolfo	rodolfo	80	0
@@ -40930,6 +41067,7 @@ samaritano	samaritano	580	0
 samaritanos	samaritanos	56	0
 samarra	samarra	69	0
 samba	samba	179	0
+sambodromo	sambódromo	0	1
 samcro	samcro	138	0
 sameen	sameen	58	0
 sameer	sameer	317	0
@@ -41316,6 +41454,7 @@ second	second	132	0
 seconds	seconds	57	0
 secos	secos	578	0
 secou	secou	212	0
+secrecao	secreção	0	1
 secrecoes	secreções	0	68
 secret	secret	303	0
 secreta	secreta	4620	0
@@ -41505,6 +41644,7 @@ semana	semana	44310	0
 semanais	semanais	203	0
 semanal	semanal	358	0
 semanalmente	semanalmente	123	0
+semanario	semanário	0	1
 semanas	semanas	27826	0
 semantica	semântica	0	157
 semblante	semblante	106	0
@@ -41565,6 +41705,7 @@ sensato	sensato	1339	0
 sensatos	sensatos	157	0
 sensei	sensei	463	0
 sensibilidade	sensibilidade	904	0
+sensibilizacao	sensibilização	0	1
 sensibilizado	sensibilizado	59	0
 sensiveis	sensíveis	0	832
 sensivel	sensível	126	3103
@@ -41752,6 +41893,7 @@ serrar	serrar	135	0
 serras	serras	132	0
 serrocold	serrocold	60	0
 serrote	serrote	117	0
+sertao	sertão	0	1
 serva	serva	340	0
 serve	serve	9029	0
 servem	servem	2666	0
@@ -42546,6 +42688,7 @@ social	social	5619	0
 socialismo	socialismo	204	0
 socialista	socialista	368	0
 socialistas	socialistas	132	0
+socializacao	socialização	0	1
 socializar	socializar	219	0
 socialmente	socialmente	383	0
 sociaveis	sociáveis	0	57
@@ -42555,6 +42698,7 @@ sociedades	sociedades	299	0
 society	society	105	0
 socio	sócio	0	3803
 sociologia	sociologia	148	0
+sociologo	sociólogo	0	1
 sociopata	sociopata	526	0
 sociopatas	sociopatas	99	0
 socios	sócios	0	1858
@@ -43222,7 +43366,7 @@ suados	suados	88	0
 suam	suam	55	0
 suando	suando	127	0
 suar	suar	1261	0
-suarez	suarez	187	0
+suarez	suárez	4	14
 suas	suas	56009	0
 suastica	suástica	0	111
 suave	suave	2393	0
@@ -43434,6 +43578,7 @@ sufocando	sufocando	64	0
 sufocante	sufocante	164	0
 sufocar	sufocar	805	0
 sufocou	sufocou	110	0
+sufragio	sufrágio	0	1
 suga	suga	209	0
 sugada	sugada	108	0
 sugado	sugado	212	0
@@ -43517,6 +43662,7 @@ sumario	sumário	0	129
 sumatra	sumatra	83	0
 sumeria	suméria	0	78
 sumi	sumi	78	0
+sumico	sumiço	0	1
 sumida	sumida	110	0
 sumido	sumido	127	0
 sumir	sumir	237	0
@@ -43564,6 +43710,7 @@ superficial	superficial	874	0
 superficie	superfície	151	3963
 superficies	superfícies	0	146
 superfluo	supérfluo	0	73
+superintendencia	superintendência	0	1
 superintendente	superintendente	584	0
 superior	superior	5330	0
 superiora	superiora	221	0
@@ -43967,7 +44114,7 @@ tambor	tambor	879	0
 tambores	tambores	591	0
 tamerlane	tamerlane	74	0
 tami	tami	97	0
-tamisa	tamisa	129	0
+tamisa	tâmisa	2	11
 tammi	tammi	79	0
 tammy	tammy	1192	0
 tamos	tamos	145	0
@@ -44083,6 +44230,7 @@ tate	tate	1117	0
 tatiana	tatiana	309	0
 tatica	tática	0	228
 taticas	táticas	0	162
+tatico	tático	0	170
 tato	tato	63	0
 tatsu	tatsu	68	0
 tatu	tatu	70	0
@@ -44418,6 +44566,7 @@ tenue	ténue	0	278
 tenzin	tenzin	171	0
 teo	teo	250	0
 teologia	teologia	159	0
+teologo	teólogo	0	1
 teor	teor	176	0
 teorema	teorema	115	0
 teoria	teoria	7622	0
@@ -44443,6 +44592,7 @@ teras	terás	0	7202
 terca	terça	0	1460
 tercas	terças	0	408
 terceira	terceira	5955	0
+terceirizacao	terceirização	0	1
 terceiro	terceiro	7056	0
 terceiros	terceiros	210	0
 terco	terço	0	867
@@ -45437,6 +45587,7 @@ tramaram	tramaram	87	0
 tramas	tramas	66	0
 tramaste	tramaste	82	0
 tramei	tramei	61	0
+tramitacao	tramitação	0	1
 tramites	trâmites	0	60
 tramoia	tramóia	0	100
 tramou	tramou	366	0
@@ -45825,6 +45976,8 @@ tribunais	tribunais	705	0
 tribunal	tribunal	14086	0
 tribune	tribune	170	0
 tribuno	tribuno	160	0
+tributacao	tributação	0	1
+tributario	tributário	0	1
 tributo	tributo	685	0
 tributos	tributos	127	0
 tricia	tricia	330	0
@@ -45873,10 +46026,11 @@ tripla	tripla	290	0
 triple	triple	89	0
 triplicado	triplicado	58	0
 triplicar	triplicar	174	0
+triplice	tríplice	0	1
 triplicou	triplicou	85	0
 triplo	triplo	953	0
 triplos	triplos	68	0
-tripoli	tripoli	70	0
+tripoli	trípoli	1	9
 tripp	tripp	654	0
 trippi	trippi	72	0
 tripulacao	tripulação	0	4275
@@ -46596,6 +46750,7 @@ valois	valois	84	0
 valor	valor	9050	0
 valores	valores	2194	0
 valoriza	valoriza	232	0
+valorizacao	valorização	0	1
 valorizada	valorizada	64	0
 valorizado	valorizado	80	0
 valorizam	valorizam	92	0
@@ -46725,6 +46880,7 @@ vaughan	vaughan	111	0
 vaughn	vaughn	1426	0
 vaza	vaza	73	0
 vazamento	vazamento	198	0
+vazao	vazão	0	1
 vazar	vazar	283	0
 vazia	vazia	3230	0
 vazias	vazias	1260	0
@@ -47203,6 +47359,7 @@ vieram	vieram	8927	0
 vierem	vierem	924	0
 vieres	vieres	686	0
 viermos	viermos	60	0
+vies	viés	0	1
 viesse	viesse	2464	0
 viessem	viessem	491	0
 viessemos	viéssemos	0	131
@@ -47226,6 +47383,7 @@ vigario	vigário	0	377
 vigarista	vigarista	908	0
 vigaristas	vigaristas	307	0
 vigas	vigas	227	0
+vigencia	vigência	0	1
 vigesimo	vigésimo	0	117
 vigia	vigia	2471	0
 vigiada	vigiada	331	0
@@ -47429,6 +47587,7 @@ visionario	visionário	0	267
 visionarios	visionários	0	74
 visiontext	visiontext	192	0
 visita	visita	9971	0
+visitacao	visitação	0	1
 visitada	visitada	56	0
 visitado	visitado	322	0
 visitados	visitados	81	0
@@ -47526,6 +47685,7 @@ vive	vive	13257	0
 viveiro	viveiro	140	0
 vivem	vivem	5061	0
 vivemos	vivemos	4060	0
+vivencia	vivência	0	1
 vivenda	vivenda	130	0
 vivendo	vivendo	1172	0
 viver	viver	38962	0
@@ -47536,7 +47696,7 @@ viveras	viverás	0	249
 viverei	viverei	369	0
 viverem	viverem	534	0
 viveremos	viveremos	334	0
-viveres	viveres	473	0
+viveres	víveres	1	12
 viveria	viveria	327	0
 viveriam	viveriam	57	0
 viveriamos	viveríamos	0	78
@@ -47625,6 +47785,7 @@ volatil	volátil	0	221
 volchok	volchok	76	0
 voldemort	voldemort	220	0
 vole	vole	90	0
+volei	vôlei	0	1
 voleibol	voleibol	260	0
 volga	volga	97	0
 volkan	volkan	56	0
@@ -47716,7 +47877,7 @@ voou	voou	919	0
 voraz	voraz	118	0
 vorenus	vorenus	148	0
 vorlons	vorlons	61	0
-vortex	vortex	147	0
+vortex	vórtex	1	3
 vortice	vórtice	0	291
 vos	vos	29088	12023
 voss	voss	193	0

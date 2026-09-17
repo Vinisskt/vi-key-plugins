@@ -133,10 +133,12 @@ end
 do
   local F = fresh().mod
   local LINHAS2 = {
-    "atras\tatrás\t0\t12345", "esta\testá\t272722\t1335658",
-    "ideia\tideia\t71498\t6403", "nao\tnão\t20377\t4754253",
-    "que\tque\t5984819\t213969", "tem\ttem\t442806\t91968",
-    "voce\tvocê\t6261\t395629",
+    "atras\tatrás\t0\t12345", "de\tde\t4079066\t12693",
+    "esta\testá\t272722\t1335658", "ideia\tideia\t71498\t6403",
+    "nao\tnão\t20377\t4754253", "pode\tpode\t279195\t3227",
+    "por\tpor\t1131581\t24231", "que\tque\t5984819\t213969",
+    "tem\ttem\t442806\t91968", "vem\tvem\t81243\t13870",
+    "vira\tvirá\t3329\t4752", "voce\tvocê\t6261\t395629",
   }
   local d = F.dados_de_linhas(LINHAS2)
   eq("E2. esta (comum) não vira está", F.corrigir_palavra(d, "esta"), nil)
@@ -149,12 +151,79 @@ do
   eq("E2. você já certa", F.corrigir_palavra(d, "você"), nil)
   eq("E2. grafia plana ausente -> corrige", F.corrigir_palavra(d, "atras"), "atrás")
   eq("E2. atrás já certa", F.corrigir_palavra(d, "atrás"), nil)
-  eq("E2. idéia (antiga) vira ideia", F.corrigir_palavra(d, "idéia"), "ideia")
+  -- verbos: acento legítimo nunca é rebaixado
+  eq("E2. vira (verbo) respeitado frente a virá", F.corrigir_palavra(d, "vira"), nil)
+  eq("E2. pôr nunca vira por", F.corrigir_palavra(d, "pôr"), nil)
+  eq("E2. pôde nunca vira pode", F.corrigir_palavra(d, "pôde"), nil)
+  eq("E2. dê nunca vira de", F.corrigir_palavra(d, "dê"), nil)
+  eq("E2. vêm (plural) respeitado", F.corrigir_palavra(d, "vêm"), nil)
+  eq("E2. vem comum preservado", F.corrigir_palavra(d, "vem"), nil)
+  -- grafia antiga com acento agora é PRESERVADA (não se rebaixa o que o
+  -- usuário digitou com acento); a plana moderna também não muda.
+  eq("E2. idéia (antiga) preservada", F.corrigir_palavra(d, "idéia"), nil)
   eq("E2. ideia já certa", F.corrigir_palavra(d, "ideia"), nil)
-  F.setup({ min_freq_nao_corrige = 0 })
+  F.setup({ min_freq_nao_corrige = 0, ratio_plana_real = 0 })
   eq("E2. proteção desligada corrige esta", F.corrigir_palavra(d, "esta"), "está")
   F.setup()
   eq("E2. opção não quebra voce", F.corrigir_palavra(d, "voce"), "você")
+end
+
+-- ============ E3. planas herdadas: contexto decide (verbos × substantivos) ====
+do
+  local F = fresh().mod
+  local d = F.dados_de_linhas({
+    "analise\tanálise\t246\t3765", "avos\tavós\t0\t1170",
+    "critica\tcrítica\t185\t1562", "estagio\testágio\t0\t1101",
+    "fabrica\tfábrica\t314\t5415", "facas\tfaças\t1693\t20225",
+    "numero\tnúmero\t1364\t37298", "publico\tpúblico\t490\t12036",
+    "secretaria\tsecretária\t436\t6561", "voce\tvocê\t6261\t395629",
+  })
+  -- sem determinante antes -> preserva o verbo que o usuário escreveu
+  eq("E3. fabrica sem contexto preservada", F.corrigir_palavra(d, "fabrica"), nil)
+  eq("E3. ele fabrica preservada", F.corrigir_palavra(d, "fabrica", "ele"), nil)
+  eq("E3. nao fabrica preservada", F.corrigir_palavra(d, "fabrica", "nao"), nil)
+  eq("E3. duvida fabrica preservada", F.corrigir_palavra(d, "fabrica", "duvida"), nil)
+  -- determinante antes -> o substantivo/adjetivo entra o acento
+  eq("E3. a fabrica vira fábrica", F.corrigir_palavra(d, "fabrica", "a"), "fábrica")
+  eq("E3. essa fabrica vira fábrica", F.corrigir_palavra(d, "fabrica", "essa"), "fábrica")
+  eq("E3. da fabrica vira fábrica", F.corrigir_palavra(d, "fabrica", "da"), "fábrica")
+  eq("E3. A fabrica vira fábrica (maiuscula)", F.corrigir_palavra(d, "fabrica", "A"), "fábrica")
+  eq("E3. eu publico preservado", F.corrigir_palavra(d, "publico", "eu"), nil)
+  eq("E3. o publico vira público", F.corrigir_palavra(d, "publico", "o"), "público")
+  eq("E3. ele critica preservado", F.corrigir_palavra(d, "critica", "ele"), nil)
+  eq("E3. a critica vira crítica", F.corrigir_palavra(d, "critica", "a"), "crítica")
+  eq("E3. o numero vira número", F.corrigir_palavra(d, "numero", "o"), "número")
+  eq("E3. eu numero preservado", F.corrigir_palavra(d, "numero", "eu"), nil)
+  -- "nu": a plana já é a forma certa, nunca acresce acento
+  eq("E3. facas sem ctx preservadas", F.corrigir_palavra(d, "facas"), nil)
+  eq("E3. as facas preservadas", F.corrigir_palavra(d, "facas", "as"), nil)
+  eq("E3. a secretaria preservada", F.corrigir_palavra(d, "secretaria", "a"), nil)
+  eq("E3. avos preservado (fração)", F.corrigir_palavra(d, "avos"), nil)
+  eq("E3. eu estagio preservado", F.corrigir_palavra(d, "estagio", "eu"), nil)
+  eq("E3. o estagio vira estágio", F.corrigir_palavra(d, "estagio", "o"), "estágio")
+  -- typos não estão na whitelist e seguem corrigindo
+  eq("E3. voce continua virando você", F.corrigir_palavra(d, "voce", "ele"), "você")
+end
+
+-- ============ E4. palavra anterior (contexto) ============
+do
+  local F = fresh().mod
+  eq("E4. inicio do texto sem anterior", F.palavra_anterior("ola ", 1), nil)
+  eq("E4. acha palavra antes do espaço", F.palavra_anterior("ola mundo ", 5), "ola")
+  eq("E4. pula separador duplo", F.palavra_anterior("ola,  mundo ", 7), "ola")
+  eq("E4. palavra anterior acentuada", F.palavra_anterior("bom coração ", 15), "coração")
+end
+
+-- ============ E5. configuração da whitelist é extensível ============
+do
+  local F = fresh().mod
+  local d = F.dados_de_linhas({ "boca\tbocá\t0\t100", "bolsa\tbolsá\t0\t100" })
+  eq("E5. boca corrige p/ bocá por padrão", F.corrigir_palavra(d, "boca"), "bocá")
+  F.setup({ planas_legitimas = { boca = "nu" } })
+  eq("E5. user adiciona boca=nu preserva", F.corrigir_palavra(d, "boca"), nil)
+  F.setup({ planas_legitimas = { bolsa = "cn" } })
+  eq("E5. bolsa=cn sem ctx preserva", F.corrigir_palavra(d, "bolsa"), nil)
+  eq("E5. bolsa=cn c/ deter vira bolsá", F.corrigir_palavra(d, "bolsa", "a"), "bolsá")
 end
 
 -- ================= F. regras: min_len e maiúsculas =================
